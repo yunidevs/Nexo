@@ -59,11 +59,15 @@ export const createAuthController = (
     config: AppConfig,
 ) => {
 
-    // Configuración de cookies
+    // Configuración de cookies. En producción el frontend y la API viven en
+    // dominios distintos (Vercel -> Render), por lo que las peticiones fetch
+    // son "cross-site". El navegador solo envía cookies en ese escenario con
+    // SameSite=None y Secure. En desarrollo se mantiene Lax.
+    const esProduccion = config.environment === "production";
     const cookieOptions = {
         httpOnly: true,
-        secure: config.environment === "production",
-        sameSite: "lax" as const,
+        secure: esProduccion,
+        sameSite: (esProduccion ? "none" : "lax") as "none" | "lax",
         path: "/api",
         maxAge: sessionDurationSeconds * 1000,
     };
