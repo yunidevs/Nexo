@@ -1,0 +1,7 @@
+node_modules
+.env
+.env.*
+!.env.example
+apps/backend/dist
+apps/backend/.npm-cache-temp
+apps/backend/.npm-tmp

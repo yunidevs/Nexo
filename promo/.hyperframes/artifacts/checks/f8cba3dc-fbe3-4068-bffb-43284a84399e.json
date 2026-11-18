@@ -1,0 +1,342 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "filesScanned": 4
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 5,
+    "findings": [
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 6.111,
+        "selector": "#dash-greet",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 240.43,
+          "top": -50.98,
+          "right": 646.04,
+          "bottom": 1.34,
+          "width": 405.61,
+          "height": 52.32
+        },
+        "containerSelector": "#root",
+        "text": "Buenos días, Carlos",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "top": 50.98
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/dashboard.html",
+        "bbox": {
+          "x": 240.43,
+          "y": -50.98,
+          "width": 405.61,
+          "height": 52.32
+        },
+        "firstSeen": 6.111,
+        "lastSeen": 7.222,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          6.111,
+          7.222
+        ]
+      },
+      {
+        "code": "panel_out_of_canvas",
+        "severity": "info",
+        "time": 6.111,
+        "selector": "#dash-side",
+        "message": "Painted panel extends outside the composition canvas.",
+        "rect": {
+          "left": -215.94,
+          "top": -128.01,
+          "right": 191.02,
+          "bottom": 1159.7,
+          "width": 406.95,
+          "height": 1287.71
+        },
+        "containerSelector": "#root",
+        "text": "NEXOERP. WORKSPACE Resumen Ventas Clientes Inven",
+        "fixHint": "Move the panel inward, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 215.94,
+          "top": 128.01,
+          "bottom": 79.7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/dashboard.html",
+        "bbox": {
+          "x": -215.94,
+          "y": -128.01,
+          "width": 406.95,
+          "height": 1287.71
+        },
+        "firstSeen": 6.111,
+        "lastSeen": 7.222,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          6.111,
+          7.222
+        ]
+      },
+      {
+        "code": "panel_out_of_canvas",
+        "severity": "info",
+        "time": 6.111,
+        "selector": "#dash-kpi-4",
+        "message": "Painted panel extends outside the composition canvas.",
+        "rect": {
+          "left": 1759.96,
+          "top": 27.5,
+          "right": 2243.22,
+          "bottom": 213.54,
+          "width": 483.26,
+          "height": 186.04
+        },
+        "containerSelector": "#root",
+        "text": "Pedidos 324 +10.4% vs. mes anterior",
+        "fixHint": "Move the panel inward, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "right": 323.22
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/dashboard.html",
+        "bbox": {
+          "x": 1759.96,
+          "y": 27.5,
+          "width": 483.26,
+          "height": 186.04
+        },
+        "firstSeen": 6.111,
+        "lastSeen": 7.222,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          6.111,
+          7.222
+        ]
+      },
+      {
+        "code": "panel_out_of_canvas",
+        "severity": "info",
+        "time": 6.111,
+        "selector": "#dash-activity-card",
+        "message": "Painted panel extends outside the composition canvas.",
+        "rect": {
+          "left": 1363.41,
+          "top": 239.7,
+          "right": 2243.19,
+          "bottom": 988.2,
+          "width": 879.78,
+          "height": 748.5
+        },
+        "containerSelector": "#root",
+        "text": "Actividad Últimos pedidos MC María Castro Pedido",
+        "fixHint": "Move the panel inward, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "right": 323.19
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/dashboard.html",
+        "bbox": {
+          "x": 1363.41,
+          "y": 239.7,
+          "width": 879.78,
+          "height": 748.5
+        },
+        "firstSeen": 6.111,
+        "lastSeen": 7.222,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          6.111,
+          7.222
+        ]
+      },
+      {
+        "code": "panel_out_of_canvas",
+        "severity": "info",
+        "time": 6.111,
+        "selector": "#dash-alert",
+        "message": "Painted panel extends outside the composition canvas.",
+        "rect": {
+          "left": 240.43,
+          "top": 1014.36,
+          "right": 2243.22,
+          "bottom": 1116.1,
+          "width": 2002.79,
+          "height": 101.74
+        },
+        "containerSelector": "#root",
+        "text": "Inventario bajo 12 productos requieren atención ",
+        "fixHint": "Move the panel inward, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "right": 323.22,
+          "bottom": 36.1
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/dashboard.html",
+        "bbox": {
+          "x": 240.43,
+          "y": 1014.36,
+          "width": 2002.79,
+          "height": 101.74
+        },
+        "firstSeen": 6.111,
+        "lastSeen": 7.222,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          6.111,
+          7.222
+        ]
+      }
+    ],
+    "duration": 10,
+    "samples": [
+      0.556,
+      1.667,
+      2.778,
+      3.889,
+      5,
+      6.111,
+      7.222,
+      8.333,
+      9.444
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 5,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      0.556,
+      2.778,
+      5,
+      7.222,
+      9.444
+    ],
+    "checked": 16,
+    "passed": 16
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 80
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 1,
+    "findings": [
+      {
+        "code": "audio_none",
+        "severity": "info",
+        "message": "The film has no sound: no clip in it plays audio.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0
+      }
+    ]
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

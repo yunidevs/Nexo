@@ -1,0 +1,722 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    #dash-frame {
+      position: absolute;
+      left: 96px;
+      top: 96px;
+      width: 1728px;
+      height: 888px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: var(--raised);
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      display: flex;
+      opacity: 0;
+    }
+    .dash-icon {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ── Sidebar ─────────────────────────────── */
+    #dash-side {
+      width: 280px;
+      shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--line-soft);
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+    }
+    #dash-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+    }
+    #dash-brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent);
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      box-shadow: 0 10px 28px rgba(99, 102, 241, 0.28);
+    }
+    #dash-brand-mark svg {
+      width: 22px;
+      height: 22px;
+    }
+    #dash-brand-name {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+
+    #dash-brand-name .dot {
+      color: var(--accent);
+    }
+    #dash-side-eyebrow {
+      margin-top: 38px;
+      padding: 0 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--dimmer);
+      opacity: 0;
+    }
+    #dash-nav {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .dash-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--faint);
+      opacity: 0;
+    }
+    .dash-nav-item svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.9;
+    }
+    .dash-nav-item.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent-pale);
+    }
+    #dash-side-foot {
+      margin-top: auto;
+      border-top: 1px solid var(--line-soft);
+      padding-top: 12px;
+    }
+    #dash-side-foot .dash-nav-item {
+      font-size: 14px;
+    }
+
+    /* ── Contenido ───────────────────────────── */
+    #dash-main {
+      flex: 1;
+      min-width: 0;
+      padding: 30px 34px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    #dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      opacity: 0;
+    }
+    #dash-date {
+      font-size: 14px;
+      color: var(--faint);
+    }
+    #dash-greet {
+      margin-top: 6px;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #dash-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #dash-search {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--faint);
+    }
+    #dash-search svg {
+      width: 18px;
+      height: 18px;
+    }
+    #dash-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 5px 14px 5px 5px;
+    }
+    #dash-user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #818cf8, #8b5cf6);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    #dash-user-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #cbd5e1;
+    }
+    #dash-user svg {
+      width: 14px;
+      height: 14px;
+      color: var(--dimmer);
+    }
+
+    /* KPIs */
+    #dash-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .dash-kpi {
+      border-radius: 16px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.025);
+      padding: 18px 20px;
+      opacity: 0;
+    }
+    .dash-kpi-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dash-kpi-label {
+      font-size: 14px;
+      color: var(--faint);
+    }
+    .dash-kpi-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+    }
+    .dash-kpi-value {
+      margin-top: 10px;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink-soft);
+      font-variant-numeric: tabular-nums;
+    }
+    .dash-kpi-change {
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--emerald);
+    }
+    .dash-kpi-change span {
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--dimmer);
+    }
+
+    /* Panel central */
+    #dash-mid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 16px;
+    }
+    .dash-card {
+      border-radius: 16px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.025);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+    }
+    .dash-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .dash-card-label {
+      font-size: 13px;
+      color: var(--faint);
+    }
+    .dash-card-title {
+      margin-top: 3px;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ink-soft);
+    }
+    .dash-card-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .dash-card-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+    .dash-dots {
+      display: flex;
+      gap: 4px;
+      padding-top: 8px;
+    }
+    .dash-dots i {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--dimmer);
+    }
+
+    /* Gráfico */
+    #dash-chart {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      margin-top: 14px;
+    }
+    #dash-chart-y {
+      position: absolute;
+      inset: 4px 0 26px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 11px;
+      color: var(--dimmer);
+      font-variant-numeric: tabular-nums;
+    }
+    #dash-chart-plot {
+      position: absolute;
+      left: 48px;
+      right: 10px;
+      top: 4px;
+      bottom: 26px;
+      border-bottom: 1px solid var(--line-soft);
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 31px,
+        var(--grid-soft) 32px
+      );
+    }
+    #dash-chart-plot svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      display: block;
+    }
+    #dash-chart-area {
+      opacity: 0;
+    }
+    #dash-chart-line {
+      stroke-dasharray: 100 120;
+      stroke-dashoffset: 110;
+    }
+    #dash-chart-x {
+      position: absolute;
+      left: 48px;
+      right: 10px;
+      bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    /* Actividad */
+    #dash-activity-rows {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .dash-act {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      opacity: 0;
+    }
+    .dash-act + .dash-act {
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .dash-act-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      shrink: 0;
+    }
+    .dash-act-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: #cbd5e1;
+    }
+    .dash-act-detail {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--faint);
+    }
+    .dash-act-amount {
+      margin-left: auto;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--emerald);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Barra inferior */
+    #dash-alert {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.025);
+      padding: 14px 20px;
+      opacity: 0;
+    }
+    #dash-alert-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(251, 146, 60, 0.1);
+      color: #fdba74;
+      display: grid;
+      place-items: center;
+    }
+    #dash-alert-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    #dash-alert-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: #cbd5e1;
+    }
+    #dash-alert-detail {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--faint);
+    }
+    #dash-alert-link {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-text);
+    }
+    #dash-alert-link svg {
+      width: 14px;
+      height: 14px;
+    }
+  </style>
+  <div id="root" data-composition-id="dashboard" data-width="1920" data-height="1080">
+    <div id="dash-frame" data-layout-allow-overflow>
+      <!-- Sidebar -->
+      <aside id="dash-side">
+        <div id="dash-brand" data-layout-ignore>
+          <div id="dash-brand-mark" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect width="7" height="9" x="3" y="3" rx="1" />
+              <rect width="7" height="5" x="14" y="3" rx="1" />
+              <rect width="7" height="9" x="14" y="12" rx="1" />
+              <rect width="7" height="5" x="3" y="16" rx="1" />
+            </svg>
+          </div>
+          <span id="dash-brand-name">NEXOERP<span class="dot">.</span></span>
+        </div>
+        <p id="dash-side-eyebrow" data-layout-ignore>Workspace</p>
+        <nav id="dash-nav" aria-label="Navegación del panel">
+          <div class="dash-nav-item active" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" />
+            </svg>
+            Resumen
+          </div>
+          <div class="dash-nav-item" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></svg>
+            Ventas
+          </div>
+          <div class="dash-nav-item" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5" /><path d="M3.5 19c.7-3 2.9-4.5 5.5-4.5s4.8 1.5 5.5 4.5" /><circle cx="17" cy="9" r="2.5" /><path d="M16 14.6c2 .3 3.4 1.6 4.1 3.9" /></svg>
+            Clientes
+          </div>
+          <div class="dash-nav-item" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5" /><rect x="13" y="3" width="8" height="8" rx="1.5" /><rect x="3" y="13" width="8" height="8" rx="1.5" /><rect x="13" y="13" width="8" height="8" rx="1.5" /></svg>
+            Inventario
+          </div>
+          <div class="dash-nav-item" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z" /><path d="M3 8l9 5 9-5" /><path d="M12 13v8" /></svg>
+            Productos
+          </div>
+          <div class="dash-nav-item" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6" /></svg>
+            Reportes
+          </div>
+        </nav>
+        <div id="dash-side-foot">
+          <div class="dash-nav-item" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4" /><line x1="10" x2="3" y1="4" y2="4" /><line x1="21" x2="12" y1="12" y2="12" /><line x1="8" x2="3" y1="12" y2="12" /><line x1="21" x2="16" y1="20" y2="20" /><line x1="12" x2="3" y1="20" y2="20" /><circle cx="12" cy="4" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="14" cy="20" r="1.6" /></svg>
+            Configuración
+          </div>
+          <div class="dash-nav-item" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" /><path d="M12 17h.01" /></svg>
+            Ayuda
+          </div>
+        </div>
+      </aside>
+
+      <!-- Contenido -->
+      <div id="dash-main">
+        <header id="dash-header">
+          <div>
+            <p id="dash-date" data-layout-ignore>Lunes, 24 de junio de 2024</p>
+            <h3 id="dash-greet">Buenos días, Carlos</h3>
+          </div>
+          <div id="dash-header-actions" data-layout-ignore>
+            <div id="dash-search">
+              <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+            </div>
+            <div id="dash-user">
+              <div id="dash-user-avatar">CG</div>
+              <span id="dash-user-name">Carlos García</span>
+              <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            </div>
+          </div>
+        </header>
+
+        <div id="dash-kpis">
+          <div class="dash-kpi" id="dash-kpi-1">
+            <div class="dash-kpi-top" data-layout-ignore><span class="dash-kpi-label">Ventas totales</span><i class="dash-kpi-dot" style="background: #a78bfa"></i></div>
+            <p class="dash-kpi-value" id="dash-kpi-ventas">$24,580</p>
+            <p class="dash-kpi-change" data-layout-ignore>+12.8% <span>vs. mes anterior</span></p>
+          </div>
+          <div class="dash-kpi" id="dash-kpi-2">
+            <div class="dash-kpi-top" data-layout-ignore><span class="dash-kpi-label">Clientes activos</span><i class="dash-kpi-dot" style="background: #38bdf8"></i></div>
+            <p class="dash-kpi-value" id="dash-kpi-clientes">1,248</p>
+            <p class="dash-kpi-change" data-layout-ignore>+8.2% <span>vs. mes anterior</span></p>
+          </div>
+          <div class="dash-kpi" id="dash-kpi-3">
+            <div class="dash-kpi-top" data-layout-ignore><span class="dash-kpi-label">Productos</span><i class="dash-kpi-dot" style="background: #34d399"></i></div>
+            <p class="dash-kpi-value" id="dash-kpi-productos">856</p>
+            <p class="dash-kpi-change" data-layout-ignore>+4.6% <span>vs. mes anterior</span></p>
+          </div>
+          <div class="dash-kpi" id="dash-kpi-4">
+            <div class="dash-kpi-top" data-layout-ignore><span class="dash-kpi-label">Pedidos</span><i class="dash-kpi-dot" style="background: #fb923c"></i></div>
+            <p class="dash-kpi-value" id="dash-kpi-pedidos">324</p>
+            <p class="dash-kpi-change" data-layout-ignore>+10.4% <span>vs. mes anterior</span></p>
+          </div>
+        </div>
+
+        <div id="dash-mid">
+          <div class="dash-card" id="dash-chart-card">
+            <div class="dash-card-head" data-layout-ignore>
+              <div>
+                <p class="dash-card-label">Rendimiento</p>
+                <p class="dash-card-title">Ventas mensuales</p>
+              </div>
+              <div class="dash-card-btn" data-layout-ignore>Este año
+                <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              </div>
+            </div>
+            <div id="dash-chart">
+              <div id="dash-chart-y" data-layout-ignore><span>$30k</span><span>$20k</span><span>$10k</span><span>$0</span></div>
+              <div id="dash-chart-plot">
+                <svg viewBox="0 0 400 120" preserveAspectRatio="none" role="img" aria-label="Gráfico de ventas mensuales">
+                  <defs>
+                    <linearGradient id="dash-sales-grad" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0" stop-color="#818cf8" stop-opacity=".28" />
+                      <stop offset="1" stop-color="#818cf8" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path id="dash-chart-area" d="M0 93 C25 79, 38 87, 62 71 S102 82, 126 60 S163 63, 188 46 S221 59, 247 41 S280 48, 308 25 S350 34, 400 8 L400 120 L0 120Z" fill="url(#dash-sales-grad)" />
+                  <path id="dash-chart-line" pathLength="100" d="M0 93 C25 79, 38 87, 62 71 S102 82, 126 60 S163 63, 188 46 S221 59, 247 41 S280 48, 308 25 S350 34, 400 8" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+                </svg>
+              </div>
+              <div id="dash-chart-x" data-layout-ignore><span>Ene</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span></div>
+            </div>
+          </div>
+
+          <div class="dash-card" id="dash-activity-card">
+            <div class="dash-card-head" data-layout-ignore>
+              <div>
+                <p class="dash-card-label">Actividad</p>
+                <p class="dash-card-title">Últimos pedidos</p>
+              </div>
+              <div class="dash-dots" data-layout-ignore><i></i><i></i><i></i></div>
+            </div>
+            <div id="dash-activity-rows" data-layout-ignore>
+              <div class="dash-act">
+                <div class="dash-act-avatar" style="background: rgba(167, 139, 250, 0.2); color: #c4b5fd" data-layout-ignore>MC</div>
+                <div><p class="dash-act-name">María Castro</p><p class="dash-act-detail">Pedido #10482</p></div>
+                <span class="dash-act-amount">+$1,240</span>
+              </div>
+              <div class="dash-act">
+                <div class="dash-act-avatar" style="background: rgba(56, 189, 248, 0.2); color: #bae6fd" data-layout-ignore>JR</div>
+                <div><p class="dash-act-name">Javier Ríos</p><p class="dash-act-detail">Pedido #10481</p></div>
+                <span class="dash-act-amount">+$860</span>
+              </div>
+              <div class="dash-act">
+                <div class="dash-act-avatar" style="background: rgba(52, 211, 153, 0.2); color: #a7f3d0" data-layout-ignore>AL</div>
+                <div><p class="dash-act-name">Ana López</p><p class="dash-act-detail">Pedido #10480</p></div>
+                <span class="dash-act-amount">+$540</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dash-alert">
+          <div id="dash-alert-icon" data-layout-ignore>
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6" /></svg>
+          </div>
+          <div data-layout-ignore>
+            <p id="dash-alert-title">Inventario bajo</p>
+            <p id="dash-alert-detail">12 productos requieren atención</p>
+          </div>
+          <div id="dash-alert-link" data-layout-ignore>Revisar ahora
+            <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Estado inicial de los contadores (determinista)
+    [["#dash-kpi-ventas", "$"], ["#dash-kpi-clientes", ""], ["#dash-kpi-productos", ""], ["#dash-kpi-pedidos", ""]].forEach(function (c) {
+      document.querySelector(c[0]).textContent = c[1] + "0";
+    });
+
+    const tl = gsap.timeline({ paused: true });
+
+    // Entrada del panel
+    tl.fromTo(
+      "#dash-frame",
+      { opacity: 0, filter: "blur(12px)" },
+      { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power3.out" },
+      0,
+    );
+
+    // Sidebar
+    tl.fromTo("#dash-brand", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.15);
+    tl.fromTo("#dash-side-eyebrow", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.2);
+    tl.fromTo(
+      "#dash-nav .dash-nav-item",
+      { opacity: 0, x: -10 },
+      { opacity: 1, x: 0, duration: 0.35, ease: "power3.out", stagger: 0.05 },
+      0.22,
+    );
+    tl.fromTo(
+      "#dash-side-foot .dash-nav-item",
+      { opacity: 0 },
+      { opacity: 1, duration: 0.3, ease: "power2.out", stagger: 0.05 },
+      0.55,
+    );
+
+    // Encabezado y KPIs
+    tl.fromTo(
+      "#dash-header",
+      { opacity: 0, filter: "blur(6px)" },
+      { opacity: 1, filter: "blur(0px)", duration: 0.35, ease: "power3.out" },
+      0.35,
+    );
+    tl.fromTo(
+      ".dash-kpi",
+      { opacity: 0, y: 22, filter: "blur(6px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, ease: "power4.out", stagger: 0.06 },
+      0.45,
+    );
+
+    // Contadores (1.2 s, aterrizan y quedan fijos)
+    [
+      ["#dash-kpi-ventas", "$", 24580],
+      ["#dash-kpi-clientes", "", 1248],
+      ["#dash-kpi-productos", "", 856],
+      ["#dash-kpi-pedidos", "", 324],
+    ].forEach(function (c) {
+      const el = document.querySelector(c[0]);
+      const o = { v: 0 };
+      tl.to(
+        o,
+        {
+          v: c[2],
+          duration: 1.2,
+          ease: "power2.out",
+          onUpdate: function () {
+            el.textContent = c[1] + Math.round(o.v).toLocaleString("en-US");
+          },
+        },
+        0.55,
+      );
+    });
+
+    // Tarjetas centrales
+    tl.fromTo("#dash-chart-card", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 0.75);
+    tl.fromTo("#dash-activity-card", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 0.85);
+
+    // Línea del gráfico se dibuja (1.2 s) y el relleno aparece detrás
+    tl.fromTo(
+      "#dash-chart-line",
+      { strokeDashoffset: 110 },
+      { strokeDashoffset: 0, duration: 1.2, ease: "power2.inOut" },
+      0.95,
+    );
+    tl.fromTo("#dash-chart-area", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, 1.4);
+
+    // Filas de actividad
+    tl.fromTo(
+      ".dash-act",
+      { opacity: 0, x: 14 },
+      { opacity: 1, x: 0, duration: 0.4, ease: "power3.out", stagger: 0.08 },
+      1.05,
+    );
+
+    // Barra inferior
+    tl.fromTo("#dash-alert", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 1.3);
+
+    // Punch-in hacia la tarjeta del gráfico (segundo encuadre de la escena)
+    tl.fromTo(
+      "#dash-frame",
+      { scale: 1, transformOrigin: "40% 56%" },
+      { scale: 1.5, duration: 0.7, ease: "power2.inOut" },
+      3,
+    );
+
+    // Salida
+    tl.to("#dash-frame", { opacity: 0, filter: "blur(10px)", duration: 0.3, ease: "power3.in" }, 4.68);
+
+    window.__timelines["dashboard"] = tl;
+  </script>
+</template>

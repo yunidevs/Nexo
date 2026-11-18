@@ -1,0 +1,530 @@
+{
+  "version": 1,
+  "historyId": "33798d3c-b7ce-4fe6-92b6-a9ecf1162311",
+  "currentRevision": "9a597a95-5846-402d-b1d1-67fa691b6938",
+  "pendingChanges": false,
+  "files": {
+    "AGENTS.md": {
+      "hash": "268ff46777938da818baa92a718571785e9acf2cef2d3ffbacbb93483dcba37a",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\26\\268ff46777938da818baa92a718571785e9acf2cef2d3ffbacbb93483dcba37a"
+    },
+    "CLAUDE.md": {
+      "hash": "268ff46777938da818baa92a718571785e9acf2cef2d3ffbacbb93483dcba37a",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\26\\268ff46777938da818baa92a718571785e9acf2cef2d3ffbacbb93483dcba37a"
+    },
+    "compositions/dashboard.html": {
+      "hash": "66f673ed201951b1c09331a22c8b68193418f90c8536fe251dbdf7dc393051de",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\66\\66f673ed201951b1c09331a22c8b68193418f90c8536fe251dbdf7dc393051de"
+    },
+    "compositions/intro.html": {
+      "hash": "73663455add9a2de15c6be482bbc25817665e8805ae8f2e090d0847ffac8ce79",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\73\\73663455add9a2de15c6be482bbc25817665e8805ae8f2e090d0847ffac8ce79"
+    },
+    "compositions/outro.html": {
+      "hash": "0c399dce1daae5aea00a21027bc3546c7239e5368f39c8d94f5d12128393adde",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\0c\\0c399dce1daae5aea00a21027bc3546c7239e5368f39c8d94f5d12128393adde"
+    },
+    "hyperframes.json": {
+      "hash": "35a6d4ea79ebe911f0d81705f7aace5d8ff0316b745b0311d56af50c9c237cb7",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\35\\35a6d4ea79ebe911f0d81705f7aace5d8ff0316b745b0311d56af50c9c237cb7"
+    },
+    "index.html": {
+      "hash": "43344d891509d4fea1d6a50c3390cd09fda3ba05e9aeb7a7b2d345d9c8f7a062",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\43\\43344d891509d4fea1d6a50c3390cd09fda3ba05e9aeb7a7b2d345d9c8f7a062"
+    },
+    "meta.json": {
+      "hash": "7598ea1d9fd58f1ce7421f0aeb04c8f7782962378a78df63e7de68963aeed241",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\75\\7598ea1d9fd58f1ce7421f0aeb04c8f7782962378a78df63e7de68963aeed241"
+    },
+    "package.json": {
+      "hash": "0be7a89d62692695f7c4853ee073afa7645dc71e666e2e603872cc2e5d7fd19e",
+      "content": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\0b\\0be7a89d62692695f7c4853ee073afa7645dc71e666e2e603872cc2e5d7fd19e"
+    }
+  },
+  "revisions": {
+    "00059533-ee72-4ce7-b2b5-79d202773c41": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794694070623,
+      "endedAt": 1794694070662,
+      "files": {
+        "compositions/dashboard.html": {
+          "before": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\4b\\4bf9e419de143a0e62b285ac9f200a49ccea4f20cdc6b69d7ffa10768bbfa2e8",
+          "after": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\65\\6567917b1271c6eb0a38ca9947905c030f9ae76ce7901cd88eb63dbb3ac33812"
+        },
+        "compositions/intro.html": {
+          "before": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\cb\\cb28aa780693ca87739804874938525a1420903a9c220af2aa30e186e8613d64",
+          "after": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\73\\73663455add9a2de15c6be482bbc25817665e8805ae8f2e090d0847ffac8ce79"
+        },
+        "compositions/outro.html": {
+          "before": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\1d\\1d926232875dad8a9b93262e882c95866f6b041d27a3f7d7f26ed46b221097ae",
+          "after": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\09\\0926be71fd0614dbc75aded3284858f5a4f27fc37d44292b1336dfd19a8321f5"
+        },
+        "index.html": {
+          "before": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\d1\\d1318d08cb93068906e0930bdec33faf8a6fe6c47926675a09faf674ccee6682",
+          "after": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\43\\43344d891509d4fea1d6a50c3390cd09fda3ba05e9aeb7a7b2d345d9c8f7a062"
+        }
+      }
+    },
+    "304d379e-b0e1-4ff7-861a-7f4577baa603": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794694098051,
+      "endedAt": 1794694098055,
+      "files": {
+        "compositions/outro.html": {
+          "before": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\09\\0926be71fd0614dbc75aded3284858f5a4f27fc37d44292b1336dfd19a8321f5",
+          "after": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\0c\\0c399dce1daae5aea00a21027bc3546c7239e5368f39c8d94f5d12128393adde"
+        }
+      }
+    },
+    "362f8825-0308-430d-b9d9-fc5d18d37ea6": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794694171398,
+      "endedAt": 1794694171403,
+      "files": {
+        "compositions/dashboard.html": {
+          "before": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\65\\6567917b1271c6eb0a38ca9947905c030f9ae76ce7901cd88eb63dbb3ac33812",
+          "after": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\c3\\c3dca64c1e71d83e687748b8333ad663ce8a0aafc3442f99b26717370b607f3b"
+        }
+      }
+    },
+    "9a597a95-5846-402d-b1d1-67fa691b6938": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794694193346,
+      "endedAt": 1794694193349,
+      "files": {
+        "compositions/dashboard.html": {
+          "before": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\c3\\c3dca64c1e71d83e687748b8333ad663ce8a0aafc3442f99b26717370b607f3b",
+          "after": "C:\\Users\\Yunier\\.cache\\hyperframes\\history\\33798d3c-b7ce-4fe6-92b6-a9ecf1162311\\blobs\\66\\66f673ed201951b1c09331a22c8b68193418f90c8536fe251dbdf7dc393051de"
+        }
+      }
+    }
+  },
+  "checks": {
+    "latest": {
+      "revision": "362f8825-0308-430d-b9d9-fc5d18d37ea6",
+      "id": "f8cba3dc-fbe3-4068-bffb-43284a84399e"
+    },
+    "revisions": {
+      "00059533-ee72-4ce7-b2b5-79d202773c41": [
+        {
+          "id": "929aad8d-7d3b-4f71-8f54-a1dc1b7d3b94",
+          "scope": "project",
+          "report": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\checks\\929aad8d-7d3b-4f71-8f54-a1dc1b7d3b94.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 45000,
+              "cache": true,
+              "contrast": true,
+              "craft": true,
+              "strict": false,
+              "snapshots": false,
+              "safeZones": [
+                "tiktok",
+                "reels",
+                "shorts"
+              ],
+              "browserGpuMode": "auto",
+              "includeUnmounted": false
+            }
+          },
+          "createdAt": 1794694079789,
+          "contentHash": "ddcc37befb1153c277f99a617afec0a6ad773c15a137e5782099a2b97e7b703a",
+          "revision": "00059533-ee72-4ce7-b2b5-79d202773c41",
+          "inputFingerprint": "ed76aa57e50bf2f398ca111beb6188e623a21429edbb68b03e1d7dbe49e6db86",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ],
+      "362f8825-0308-430d-b9d9-fc5d18d37ea6": [
+        {
+          "id": "f8cba3dc-fbe3-4068-bffb-43284a84399e",
+          "scope": "project",
+          "report": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\checks\\f8cba3dc-fbe3-4068-bffb-43284a84399e.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 45000,
+              "cache": true,
+              "contrast": true,
+              "craft": true,
+              "strict": false,
+              "snapshots": false,
+              "safeZones": [
+                "tiktok",
+                "reels",
+                "shorts"
+              ],
+              "browserGpuMode": "auto",
+              "includeUnmounted": false
+            }
+          },
+          "createdAt": 1794694177342,
+          "contentHash": "2475bd37446b75305ba750d406460837817e38ceba2fef0d7606e8028d45d4de",
+          "revision": "362f8825-0308-430d-b9d9-fc5d18d37ea6",
+          "inputFingerprint": "e1e18a389171c086e2eba352ba950911ba875c20583ea3abbe1d11386eadcfb4",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ]
+    },
+    "unversioned": [
+      {
+        "id": "d3c1a78a-baf8-41fc-b9bb-6ea8bf92bc3c",
+        "scope": "project",
+        "report": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\checks\\d3c1a78a-baf8-41fc-b9bb-6ea8bf92bc3c.json",
+        "metadata": {
+          "ok": false,
+          "browserSkipped": false,
+          "options": {
+            "samples": 9,
+            "atTransitions": false,
+            "maxIssues": 80,
+            "collapseStatic": true,
+            "tolerance": 2,
+            "timeout": 45000,
+            "cache": true,
+            "contrast": true,
+            "craft": true,
+            "strict": false,
+            "snapshots": false,
+            "safeZones": [
+              "tiktok",
+              "reels",
+              "shorts"
+            ],
+            "browserGpuMode": "auto",
+            "includeUnmounted": false
+          }
+        },
+        "createdAt": 1794693971140,
+        "contentHash": "3362360be3086db829217ead581f292d2ad027642dac619dcf54fce63887fde6",
+        "revision": null,
+        "inputFingerprint": "1f306ef9c3fe05b39bbed0b80714a828c3b482a47e790c378bfb72c3db78c737",
+        "inputScope": "local-project-files",
+        "attribution": "unversioned"
+      }
+    ]
+  },
+  "snapshots": {
+    "latest": {
+      "revision": "9a597a95-5846-402d-b1d1-67fa691b6938",
+      "id": "cc9d2b13-ca99-4a5d-b6fc-92d3167cf9cd-5"
+    },
+    "revisions": {
+      "304d379e-b0e1-4ff7-861a-7f4577baa603": [
+        {
+          "scope": "full",
+          "id": "44987646-fcef-49ef-aa0f-813a18b13c4f-0",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\73855fc8-3cfa-4591-93b4-f803e024f3f2\\frame-00-at-0.1s.png",
+          "time": 0.1,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694105840,
+          "contentHash": "22dc9be4c443adb5fead9087d6451e9e09d4e6e9200e08bb46fc67a4ef24253f",
+          "revision": "304d379e-b0e1-4ff7-861a-7f4577baa603",
+          "inputFingerprint": "1b5e9cfb3f05b139d6d38c64594eddb9eb18487a4862bd74d78d261d98027b4a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "44987646-fcef-49ef-aa0f-813a18b13c4f-1",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\73855fc8-3cfa-4591-93b4-f803e024f3f2\\frame-01-at-1.5s.png",
+          "time": 1.5,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694105840,
+          "contentHash": "ac93cb2e844880abc05f85bc714ec3e09b36e650a1df668620170165ce6f42bf",
+          "revision": "304d379e-b0e1-4ff7-861a-7f4577baa603",
+          "inputFingerprint": "1b5e9cfb3f05b139d6d38c64594eddb9eb18487a4862bd74d78d261d98027b4a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "44987646-fcef-49ef-aa0f-813a18b13c4f-2",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\73855fc8-3cfa-4591-93b4-f803e024f3f2\\frame-02-at-3.4s.png",
+          "time": 3.4,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694105840,
+          "contentHash": "8e25063c5c70eaab02091c2246935f2d647aeebc55f3dba765bf0f0e80a345f8",
+          "revision": "304d379e-b0e1-4ff7-861a-7f4577baa603",
+          "inputFingerprint": "1b5e9cfb3f05b139d6d38c64594eddb9eb18487a4862bd74d78d261d98027b4a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "44987646-fcef-49ef-aa0f-813a18b13c4f-3",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\73855fc8-3cfa-4591-93b4-f803e024f3f2\\frame-03-at-4.6s.png",
+          "time": 4.6,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694105840,
+          "contentHash": "da47403a88a62999c0dc9b777fdc35761cd8ce30d7036eccce6738dcdb5403b1",
+          "revision": "304d379e-b0e1-4ff7-861a-7f4577baa603",
+          "inputFingerprint": "1b5e9cfb3f05b139d6d38c64594eddb9eb18487a4862bd74d78d261d98027b4a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "44987646-fcef-49ef-aa0f-813a18b13c4f-4",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\73855fc8-3cfa-4591-93b4-f803e024f3f2\\frame-04-at-6.2s.png",
+          "time": 6.2,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694105841,
+          "contentHash": "73be0d817fd23d6515f9838345fbcbccd913f2585608609ec223e79412da2909",
+          "revision": "304d379e-b0e1-4ff7-861a-7f4577baa603",
+          "inputFingerprint": "1b5e9cfb3f05b139d6d38c64594eddb9eb18487a4862bd74d78d261d98027b4a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "44987646-fcef-49ef-aa0f-813a18b13c4f-5",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\73855fc8-3cfa-4591-93b4-f803e024f3f2\\frame-05-at-8.4s.png",
+          "time": 8.4,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694105842,
+          "contentHash": "3b1b8d15b36c0761127b01da83c91f6776676f803dc48d8cf8ed209af01e744a",
+          "revision": "304d379e-b0e1-4ff7-861a-7f4577baa603",
+          "inputFingerprint": "1b5e9cfb3f05b139d6d38c64594eddb9eb18487a4862bd74d78d261d98027b4a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "44987646-fcef-49ef-aa0f-813a18b13c4f-6",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\73855fc8-3cfa-4591-93b4-f803e024f3f2\\frame-06-at-9.5s.png",
+          "time": 9.5,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694105843,
+          "contentHash": "3b1b8d15b36c0761127b01da83c91f6776676f803dc48d8cf8ed209af01e744a",
+          "revision": "304d379e-b0e1-4ff7-861a-7f4577baa603",
+          "inputFingerprint": "1b5e9cfb3f05b139d6d38c64594eddb9eb18487a4862bd74d78d261d98027b4a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "44987646-fcef-49ef-aa0f-813a18b13c4f-7",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\73855fc8-3cfa-4591-93b4-f803e024f3f2\\frame-07-at-9.75s.png",
+          "time": 9.75,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694105844,
+          "contentHash": "3b1b8d15b36c0761127b01da83c91f6776676f803dc48d8cf8ed209af01e744a",
+          "revision": "304d379e-b0e1-4ff7-861a-7f4577baa603",
+          "inputFingerprint": "1b5e9cfb3f05b139d6d38c64594eddb9eb18487a4862bd74d78d261d98027b4a",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ],
+      "9a597a95-5846-402d-b1d1-67fa691b6938": [
+        {
+          "scope": "full",
+          "id": "cc9d2b13-ca99-4a5d-b6fc-92d3167cf9cd-0",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\900183d6-cf68-48a6-8d34-07f3829b3fd4\\frame-00-at-5.2s.png",
+          "time": 5.2,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694199335,
+          "contentHash": "73be0d817fd23d6515f9838345fbcbccd913f2585608609ec223e79412da2909",
+          "revision": "9a597a95-5846-402d-b1d1-67fa691b6938",
+          "inputFingerprint": "b5333d41730a8d4c44294d383b07782a89543f2279304297f1843c53439c905b",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "cc9d2b13-ca99-4a5d-b6fc-92d3167cf9cd-1",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\900183d6-cf68-48a6-8d34-07f3829b3fd4\\frame-01-at-5.8s.png",
+          "time": 5.8,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694199337,
+          "contentHash": "c5093090db922c8ed4393cbe1e1ec2e4b3b64d906d741ec8ab3680484fd8ec06",
+          "revision": "9a597a95-5846-402d-b1d1-67fa691b6938",
+          "inputFingerprint": "b5333d41730a8d4c44294d383b07782a89543f2279304297f1843c53439c905b",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "cc9d2b13-ca99-4a5d-b6fc-92d3167cf9cd-2",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\900183d6-cf68-48a6-8d34-07f3829b3fd4\\frame-02-at-6.5s.png",
+          "time": 6.5,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694199339,
+          "contentHash": "131bb3bb1ecf8ea0272b4f35fe5934e8fa10178f6f7ba0c596cc9693cf7ee547",
+          "revision": "9a597a95-5846-402d-b1d1-67fa691b6938",
+          "inputFingerprint": "b5333d41730a8d4c44294d383b07782a89543f2279304297f1843c53439c905b",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "cc9d2b13-ca99-4a5d-b6fc-92d3167cf9cd-3",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\900183d6-cf68-48a6-8d34-07f3829b3fd4\\frame-03-at-7.2s.png",
+          "time": 7.2,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694199340,
+          "contentHash": "131bb3bb1ecf8ea0272b4f35fe5934e8fa10178f6f7ba0c596cc9693cf7ee547",
+          "revision": "9a597a95-5846-402d-b1d1-67fa691b6938",
+          "inputFingerprint": "b5333d41730a8d4c44294d383b07782a89543f2279304297f1843c53439c905b",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "cc9d2b13-ca99-4a5d-b6fc-92d3167cf9cd-4",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\900183d6-cf68-48a6-8d34-07f3829b3fd4\\frame-04-at-7.5s.png",
+          "time": 7.5,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694199342,
+          "contentHash": "8f6fa2d3e8591736cdbe63f7ea8160ab1be009f690e076d89242cd78f3705f9f",
+          "revision": "9a597a95-5846-402d-b1d1-67fa691b6938",
+          "inputFingerprint": "b5333d41730a8d4c44294d383b07782a89543f2279304297f1843c53439c905b",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "scope": "full",
+          "id": "cc9d2b13-ca99-4a5d-b6fc-92d3167cf9cd-5",
+          "image": "D:\\Proyectos\\Portafolio\\nexo-erp\\promo\\.hyperframes\\artifacts\\snapshots\\900183d6-cf68-48a6-8d34-07f3829b3fd4\\frame-05-at-9.75s.png",
+          "time": 9.75,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794694199345,
+          "contentHash": "3b1b8d15b36c0761127b01da83c91f6776676f803dc48d8cf8ed209af01e744a",
+          "revision": "9a597a95-5846-402d-b1d1-67fa691b6938",
+          "inputFingerprint": "b5333d41730a8d4c44294d383b07782a89543f2279304297f1843c53439c905b",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ]
+    },
+    "unversioned": []
+  }
+}

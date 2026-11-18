@@ -1,0 +1,97 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    #outro-stack {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .outro-line {
+      font-size: 88px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.14;
+      color: var(--ink);
+      opacity: 0;
+    }
+    #outro-line2 {
+      color: var(--accent-text);
+    }
+    #outro-brand {
+      margin-top: 44px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+    }
+    #outro-brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent);
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      box-shadow: 0 10px 28px rgba(99, 102, 241, 0.28);
+    }
+    #outro-brand-mark svg {
+      width: 22px;
+      height: 22px;
+    }
+    #outro-brand-name {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #outro-brand-name .dot {
+      color: var(--accent);
+    }
+  </style>
+  <div id="root" data-composition-id="outro" data-width="1920" data-height="1080">
+    <div id="outro-stack">
+      <h1 class="outro-line" id="outro-line1" data-var-text="outroLine1">Todo tu negocio,</h1>
+      <h1 class="outro-line" id="outro-line2" data-var-text="outroLine2">en un solo panel.</h1>
+      <div id="outro-brand">
+        <div id="outro-brand-mark" data-layout-ignore>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect width="7" height="9" x="3" y="3" rx="1" />
+            <rect width="7" height="5" x="14" y="3" rx="1" />
+            <rect width="7" height="9" x="14" y="12" rx="1" />
+            <rect width="7" height="5" x="3" y="16" rx="1" />
+          </svg>
+        </div>
+        <span id="outro-brand-name">NEXOERP<span class="dot">.</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo(
+      "#outro-line1",
+      { opacity: 0, filter: "blur(8px)" },
+      { opacity: 1, filter: "blur(0px)", duration: 0.24, ease: "power4.out" },
+      0.1,
+    );
+    tl.fromTo(
+      "#outro-line2",
+      { opacity: 0, filter: "blur(8px)" },
+      { opacity: 1, filter: "blur(0px)", duration: 0.24, ease: "power4.out" },
+      0.32,
+    );
+    tl.fromTo(
+      "#outro-brand",
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" },
+      0.28,
+    );
+    window.__timelines["outro"] = tl;
+  </script>
+</template>

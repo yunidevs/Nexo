@@ -1,0 +1,90 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    #intro-stack {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    #intro-mark {
+      width: 104px;
+      height: 104px;
+      border-radius: 26px;
+      background: var(--accent);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 24px 64px rgba(99, 102, 241, 0.35);
+    }
+    #intro-mark svg {
+      width: 52px;
+      height: 52px;
+    }
+    #intro-word {
+      font-size: 112px;
+      font-weight: 900;
+      letter-spacing: -0.035em;
+      color: var(--ink);
+      line-height: 1;
+      opacity: 0;
+    }
+    #intro-word .dot {
+      color: var(--accent);
+    }
+    #intro-tag {
+      font-size: 30px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: var(--faint);
+      opacity: 0;
+    }
+  </style>
+  <div id="root" data-composition-id="intro" data-width="1920" data-height="1080">
+    <div id="intro-stack">
+      <div id="intro-mark" data-layout-ignore>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="7" height="9" x="3" y="3" rx="1" />
+          <rect width="7" height="5" x="14" y="3" rx="1" />
+          <rect width="7" height="9" x="14" y="12" rx="1" />
+          <rect width="7" height="5" x="3" y="16" rx="1" />
+        </svg>
+      </div>
+      <h1 id="intro-word">NEXOERP<span class="dot">.</span></h1>
+      <p id="intro-tag" data-var-text="tagline">Tu operación, ordenada.</p>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // La marca ya está en pantalla en el frame 0 (miniatura en reproductores sociales)
+    tl.fromTo(
+      "#intro-mark",
+      { scale: 0.86 },
+      { scale: 1, duration: 0.5, ease: "power4.out" },
+      0,
+    );
+    tl.fromTo(
+      "#intro-word",
+      { opacity: 0, filter: "blur(10px)" },
+      { opacity: 1, filter: "blur(0px)", duration: 0.26, ease: "power4.out" },
+      0.25,
+    );
+    tl.fromTo(
+      "#intro-tag",
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" },
+      0.5,
+    );
+    tl.to(
+      "#intro-stack",
+      { opacity: 0, filter: "blur(10px)", duration: 0.28, ease: "power3.in" },
+      2.28,
+    );
+    window.__timelines["intro"] = tl;
+  </script>
+</template>
