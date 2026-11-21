@@ -26,6 +26,8 @@ interface Cliente {
     direccion: string | null;
     activo: boolean;
     creadaEn: string;
+    origen: "MANUAL" | "MARKETPLACE";
+    posibleDuplicado: boolean;
 }
 
 interface OperacionCliente {
@@ -41,6 +43,24 @@ interface Paginacion {
     limite: number;
     total: number;
     totalPaginas: number;
+}
+
+interface ActividadComercial {
+    totales: {
+        totalComprado: number;
+        cantidadPedidos: number;
+        ticketPromedio: number;
+        ultimaCompra: string | null;
+        pedidosCompletados: number;
+        pedidosPendientes: number;
+    };
+    pedidosRecientes: {
+        id: string;
+        fecha: string;
+        total: number;
+        estado: string;
+        articulos: number;
+    }[];
 }
 
 interface FormularioCliente {
@@ -82,7 +102,11 @@ function esCliente(valor: unknown): valor is Cliente {
         "activo" in valor &&
         typeof valor.activo === "boolean" &&
         "creadaEn" in valor &&
-        typeof valor.creadaEn === "string"
+        typeof valor.creadaEn === "string" &&
+        "origen" in valor &&
+        ["MANUAL", "MARKETPLACE"].includes(String(valor.origen)) &&
+        "posibleDuplicado" in valor &&
+        typeof valor.posibleDuplicado === "boolean"
     );
 }
 
@@ -151,6 +175,18 @@ function esResultadoOperaciones(
         valor.datos.every(esOperacion) &&
         "paginacion" in valor &&
         esPaginacion(valor.paginacion)
+    );
+}
+
+function esActividadComercial(valor: unknown): valor is ActividadComercial {
+    if (typeof valor !== "object" || valor === null) return false;
+
+    return (
+        "totales" in valor &&
+        typeof valor.totales === "object" &&
+        valor.totales !== null &&
+        "pedidosRecientes" in valor &&
+        Array.isArray(valor.pedidosRecientes)
     );
 }
 
@@ -226,6 +262,9 @@ export default function PaginaClientes() {
     });
     const [cargandoHistorial, setCargandoHistorial] = useState(false);
     const [errorHistorial, setErrorHistorial] = useState("");
+    const [pestanaActiva, setPestanaActiva] = useState<"operaciones" | "comercial">("operaciones");
+    const [actividadComercial, setActividadComercial] = useState<ActividadComercial | null>(null);
+    const [cargandoComercial, setCargandoComercial] = useState(false);
 
     useEffect(() => {
         let cancelada = false;
@@ -301,16 +340,19 @@ export default function PaginaClientes() {
     async function consultarCliente(cliente: Cliente) {
         setClienteConsultado(cliente);
         setOperaciones([]);
+        setActividadComercial(null);
         setPaginacionOperaciones((actual) => ({ ...actual, pagina: 1 }));
         setCargandoHistorial(true);
+        setCargandoComercial(true);
         setErrorHistorial("");
 
         try {
-            const [detalle, historial] = await Promise.all([
+            const [detalle, historial, comercial] = await Promise.all([
                 apiRequest(`/clientes/${cliente.id}`),
                 apiRequest(
                     `/clientes/${cliente.id}/historial?pagina=1&limite=${paginacionOperaciones.limite}`,
                 ),
+                apiRequest(`/clientes/${cliente.id}/comercial`),
             ]);
 
             const clienteDetalle =
@@ -326,17 +368,23 @@ export default function PaginaClientes() {
                 throw new Error("La API devolvió un historial no válido.");
             }
 
+            if (!esActividadComercial(comercial)) {
+                throw new Error("La API devolvió una actividad comercial no válida.");
+            }
+
             setClienteConsultado(clienteDetalle);
             setOperaciones(historial.datos);
             setPaginacionOperaciones(historial.paginacion);
+            setActividadComercial(comercial);
         } catch (error) {
             setErrorHistorial(
                 error instanceof Error
                     ? error.message
-                    : "No se pudo cargar el historial del cliente.",
+                    : "No se pudo cargar la información del cliente.",
             );
         } finally {
             setCargandoHistorial(false);
+            setCargandoComercial(false);
         }
     }
 
@@ -579,24 +627,37 @@ export default function PaginaClientes() {
                                                 className="text-slate-300"
                                             >
                                                 <td className="px-5 py-4">
-                                                    <p className="font-medium text-foreground">
-                                                        {cliente.nombre}{" "}
-                                                        {cliente.apellido}
-                                                    </p>
-                                                    <p className="mt-1 text-xs text-slate-500">
-                                                        Añadido{" "}
-                                                        {new Intl.DateTimeFormat(
-                                                            "es",
-                                                            {
-                                                                dateStyle:
-                                                                    "medium",
-                                                            },
-                                                        ).format(
-                                                            new Date(
-                                                                cliente.creadaEn,
-                                                            ),
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-medium text-foreground">
+                                                            {cliente.nombre}{" "}
+                                                            {cliente.apellido}
+                                                        </p>
+                                                        {cliente.posibleDuplicado && (
+                                                            <span title="Posible duplicado detectado" className="flex size-5 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+                                                                <CircleAlert className="size-3" />
+                                                            </span>
                                                         )}
-                                                    </p>
+                                                    </div>
+                                                    <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                                                        <span>
+                                                            {cliente.origen === "MARKETPLACE" ? "🛒 Marketplace" : "👤 Manual"}
+                                                        </span>
+                                                        <span>•</span>
+                                                        <span>
+                                                            Añadido{" "}
+                                                            {new Intl.DateTimeFormat(
+                                                                "es",
+                                                                {
+                                                                    dateStyle:
+                                                                        "medium",
+                                                                },
+                                                            ).format(
+                                                                new Date(
+                                                                    cliente.creadaEn,
+                                                                ),
+                                                            )}
+                                                        </span>
+                                                    </div>
                                                 </td>
                                                 <td className="px-5 py-4">
                                                     {cliente.documento || "—"}
@@ -728,103 +789,206 @@ export default function PaginaClientes() {
                             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
                                 <div>
                                     <p className="text-xs font-medium uppercase tracking-wide text-indigo-300">
-                                        Historial de operaciones
+                                        Ficha del cliente
                                     </p>
                                     <h2 className="mt-1 text-lg font-semibold text-foreground">
                                         {clienteConsultado.nombre} {clienteConsultado.apellido ?? ""}
                                     </h2>
                                 </div>
-                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300">
-                                    {paginacionOperaciones.total} {paginacionOperaciones.total === 1 ? "operación" : "operaciones"}
-                                </span>
-                            </div>
-
-                            <div className="p-5">
-                                {cargandoHistorial ? (
-                                    <div className="flex items-center justify-center py-8 text-sm text-slate-400">
-                                        <LoaderCircle className="mr-2 size-4 animate-spin" />
-                                        Cargando historial...
-                                    </div>
-                                ) : errorHistorial ? (
-                                    <div className="rounded-lg border border-red-500/20 bg-red-500/[0.07] p-3 text-sm text-red-300">
-                                        {errorHistorial}
-                                    </div>
-                                ) : operaciones.length === 0 ? (
-                                    <div className="py-8 text-center text-sm text-slate-400">
-                                        Aún no hay operaciones registradas para este cliente.
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {operaciones.map((operacion) => (
-                                            <article
-                                                key={operacion.id}
-                                                className="rounded-xl border border-white/[0.08] bg-surface p-4"
-                                            >
-                                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                                    <div>
-                                                        <p className="font-medium text-foreground">
-                                                            {etiquetaOperacion(operacion.tipo)}
-                                                        </p>
-                                                        <p className="mt-1 text-sm text-slate-400">
-                                                            {operacion.detalle}
-                                                        </p>
-                                                    </div>
-                                                    <span className="rounded-full bg-indigo-500/10 px-2.5 py-1 text-[11px] font-medium text-indigo-200">
-                                                        {operacion.tipo}
-                                                    </span>
-                                                </div>
-                                                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                                                    <span>{fechaLegible(operacion.creadaEn)}</span>
-                                                    {operacion.usuario && (
-                                                        <span>
-                                                            Por {operacion.usuario.nombre} {operacion.usuario.apellido}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </article>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            <footer className="flex items-center justify-between border-t border-white/[0.08] px-5 py-3 text-sm text-slate-500">
-                                <span>
-                                    Página {paginacionOperaciones.pagina} de{" "}
-                                    {Math.max(paginacionOperaciones.totalPaginas, 1)}
-                                </span>
                                 <div className="flex gap-2">
                                     <button
                                         type="button"
-                                        disabled={cargandoHistorial || paginacionOperaciones.pagina <= 1}
-                                        onClick={() =>
-                                            void cambiarPaginaHistorial(
-                                                paginacionOperaciones.pagina - 1,
-                                            )
-                                        }
-                                        aria-label="Página anterior del historial"
-                                        className="rounded-md border border-white/10 p-2 text-slate-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
+                                        onClick={() => setPestanaActiva("operaciones")}
+                                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                                            pestanaActiva === "operaciones"
+                                                ? "bg-indigo-500 text-on-accent"
+                                                : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                                        }`}
                                     >
-                                        <ChevronLeft className="size-4" />
+                                        Operaciones
                                     </button>
                                     <button
                                         type="button"
-                                        disabled={
-                                            cargandoHistorial ||
-                                            paginacionOperaciones.pagina >=
-                                                paginacionOperaciones.totalPaginas
-                                        }
-                                        onClick={() =>
-                                            void cambiarPaginaHistorial(
-                                                paginacionOperaciones.pagina + 1,
-                                            )
-                                        }
-                                        aria-label="Página siguiente del historial"
-                                        className="rounded-md border border-white/10 p-2 text-slate-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
+                                        onClick={() => setPestanaActiva("comercial")}
+                                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                                            pestanaActiva === "comercial"
+                                                ? "bg-indigo-500 text-on-accent"
+                                                : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                                        }`}
                                     >
-                                        <ChevronRight className="size-4" />
+                                        Actividad comercial
                                     </button>
                                 </div>
-                            </footer>
+                            </div>
+
+                            <div className="p-5">
+                                {pestanaActiva === "operaciones" ? (
+                                    <>
+                                        {cargandoHistorial ? (
+                                            <div className="flex items-center justify-center py-8 text-sm text-slate-400">
+                                                <LoaderCircle className="mr-2 size-4 animate-spin" />
+                                                Cargando historial...
+                                            </div>
+                                        ) : errorHistorial ? (
+                                            <div className="rounded-lg border border-red-500/20 bg-red-500/[0.07] p-3 text-sm text-red-300">
+                                                {errorHistorial}
+                                            </div>
+                                        ) : operaciones.length === 0 ? (
+                                            <div className="py-8 text-center text-sm text-slate-400">
+                                                Aún no hay operaciones registradas para este cliente.
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                {operaciones.map((operacion) => (
+                                                    <article
+                                                        key={operacion.id}
+                                                        className="rounded-xl border border-white/[0.08] bg-surface p-4"
+                                                    >
+                                                        <div className="flex flex-wrap items-start justify-between gap-3">
+                                                            <div>
+                                                                <p className="font-medium text-foreground">
+                                                                    {etiquetaOperacion(operacion.tipo)}
+                                                                </p>
+                                                                <p className="mt-1 text-sm text-slate-400">
+                                                                    {operacion.detalle}
+                                                                </p>
+                                                            </div>
+                                                            <span className="rounded-full bg-indigo-500/10 px-2.5 py-1 text-[11px] font-medium text-indigo-200">
+                                                                {operacion.tipo}
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                                                            <span>{fechaLegible(operacion.creadaEn)}</span>
+                                                            {operacion.usuario && (
+                                                                <span>
+                                                                    Por {operacion.usuario.nombre} {operacion.usuario.apellido}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </article>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <footer className="mt-4 flex items-center justify-between border-t border-white/[0.08] pt-3 text-sm text-slate-500">
+                                            <span>
+                                                Página {paginacionOperaciones.pagina} de{" "}
+                                                {Math.max(paginacionOperaciones.totalPaginas, 1)}
+                                            </span>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    disabled={cargandoHistorial || paginacionOperaciones.pagina <= 1}
+                                                    onClick={() =>
+                                                        void cambiarPaginaHistorial(
+                                                            paginacionOperaciones.pagina - 1,
+                                                        )
+                                                    }
+                                                    aria-label="Página anterior del historial"
+                                                    className="rounded-md border border-white/10 p-2 text-slate-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
+                                                >
+                                                    <ChevronLeft className="size-4" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={
+                                                        cargandoHistorial ||
+                                                        paginacionOperaciones.pagina >=
+                                                            paginacionOperaciones.totalPaginas
+                                                    }
+                                                    onClick={() =>
+                                                        void cambiarPaginaHistorial(
+                                                            paginacionOperaciones.pagina + 1,
+                                                        )
+                                                    }
+                                                    aria-label="Página siguiente del historial"
+                                                    className="rounded-md border border-white/10 p-2 text-slate-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
+                                                >
+                                                    <ChevronRight className="size-4" />
+                                                </button>
+                                            </div>
+                                        </footer>
+                                    </>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {cargandoComercial ? (
+                                            <div className="flex items-center justify-center py-8 text-sm text-slate-400">
+                                                <LoaderCircle className="mr-2 size-4 animate-spin" />
+                                                Cargando actividad comercial...
+                                            </div>
+                                        ) : actividadComercial ? (
+                                            <>
+                                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                                    <TarjetaMetrica
+                                                        label="Total comprado"
+                                                        valor={`$${Number(actividadComercial.totales.totalComprado).toLocaleString()}`}
+                                                    />
+                                                    <TarjetaMetrica
+                                                        label="Nº pedidos"
+                                                        valor={actividadComercial.totales.cantidadPedidos.toString()}
+                                                    />
+                                                    <TarjetaMetrica
+                                                        label="Ticket promedio"
+                                                        valor={`$${Number(actividadComercial.totales.ticketPromedio).toLocaleString()}`}
+                                                    />
+                                                    <TarjetaMetrica
+                                                        label="Última compra"
+                                                        valor={actividadComercial.totales.ultimaCompra ? new Intl.DateTimeFormat("es", { dateStyle: "medium" }).format(new Date(actividadComercial.totales.ultimaCompra)) : "Nunca"}
+                                                    />
+                                                    <TarjetaMetrica
+                                                        label="Completados"
+                                                        valor={actividadComercial.totales.pedidosCompletados.toString()}
+                                                    />
+                                                    <TarjetaMetrica
+                                                        label="Pendientes"
+                                                        valor={actividadComercial.totales.pedidosPendientes.toString()}
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <h3 className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                                                        Pedidos recientes
+                                                    </h3>
+                                                    <div className="mt-3 space-y-2">
+                                                        {actividadComercial.pedidosRecientes.length === 0 ? (
+                                                            <p className="py-4 text-center text-sm text-slate-500">
+                                                                No hay pedidos registrados.
+                                                            </p>
+                                                        ) : (
+                                                            actividadComercial.pedidosRecientes.map((pedido) => (
+                                                                <div
+                                                                    key={pedido.id}
+                                                                    className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.01] px-4 py-3"
+                                                                >
+                                                                    <div>
+                                                                        <p className="text-sm font-medium text-slate-200">
+                                                                            {new Intl.DateTimeFormat("es", { dateStyle: "medium" }).format(new Date(pedido.fecha))}
+                                                                        </p>
+                                                                        <p className="text-xs text-slate-500">
+                                                                            {pedido.articulos} {pedido.articulos === 1 ? "artículo" : "artículos"}
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="text-right">
+                                                                        <p className="text-sm font-semibold text-foreground">
+                                                                            ${Number(pedido.total).toLocaleString()}
+                                                                        </p>
+                                                                        <span className="text-[10px] uppercase tracking-wide text-indigo-300">
+                                                                            {pedido.estado.replace(/_/g, " ")}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            ))
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <p className="py-8 text-center text-sm text-slate-400">
+                                                No se pudo cargar la actividad comercial.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </aside>
                     )}
                 </section>
@@ -1003,5 +1167,16 @@ function CampoCliente({
                 className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 text-sm text-foreground outline-none focus:border-indigo-400/70"
             />
         </label>
+    );
+}
+
+function TarjetaMetrica({ label, valor }: { label: string; valor: string }) {
+    return (
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                {label}
+            </p>
+            <p className="mt-1 text-lg font-semibold text-foreground">{valor}</p>
+        </div>
     );
 }

@@ -39,8 +39,10 @@ export function createCustomerRoutes(
     );
     router.get("/", controller.listar);
     router.post("/", controller.crear);
+    router.get("/duplicados", controller.listarDuplicados);
     router.get("/:id", controller.obtener);
     router.get("/:id/historial", controller.historial);
+    router.get("/:id/comercial", controller.actividadComercial);
     router.patch("/:id", controller.actualizar);
     router.patch("/:id/estado", controller.cambiarEstado);
 

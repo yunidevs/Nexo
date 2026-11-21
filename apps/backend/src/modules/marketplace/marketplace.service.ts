@@ -35,6 +35,8 @@ import {
     createWhatsappService,
     requireWhatsappConfig,
 } from "./whatsapp.service.js";
+import { resolverClienteCompra } from "../clientes/clientes.service.js";
+import { normalizarTelefono } from "../comun/telefono.js";
 
 const IMPORTE_MAXIMO = new Prisma.Decimal("9999999999.99");
 const VIGENCIA_PEDIDO_MS = 30 * 60 * 1000;
@@ -168,24 +170,6 @@ export interface CodigoVerificacionEnviado {
     expiraEn: string;
 }
 
-/**
- * Normaliza el número al formato que exige la API de WhatsApp Cloud: solo
- * dígitos con código de país, sin "+", "00", espacios ni separadores.
- */
-export function normalizarTelefono(telefono: string): string {
-    const normalizado = telefono
-        .replace(/[\s().-]/g, "")
-        .replace(/^\+/, "")
-        .replace(/^0{2}/, "");
-    if (!/^\d{7,20}$/.test(normalizado)) {
-        throw new AppError(
-            "TELEFONO_INVALIDO",
-            "El número de teléfono no es válido. Inclúyelo con el código de país, por ejemplo 598 95 123 456.",
-            400,
-        );
-    }
-    return normalizado;
-}
 
 const camposPedidoMarketplace = {
     id: true,
@@ -721,16 +705,15 @@ export const createMarketplaceService = (
                     Prisma.sql`SELECT "id" FROM "productos" WHERE "id" IN (${Prisma.join(idsProductos.map((id) => Prisma.sql`${id}::uuid`))}) ORDER BY "id" FOR UPDATE`,
                 );
 
-                const cliente = await tx.cliente.create({
-                    data: {
-                        empresaId: pedido.empresaId,
-                        nombre: pedido.nombreComprador,
-                        telefono: pedido.telefonoComprador,
-                        correo: pedido.correoComprador,
-                        direccion: `${pedido.direccion}, ${pedido.localidad}, ${pedido.departamento}`,
-                    },
-                    select: { id: true },
+                const cliente = await resolverClienteCompra(tx, pedido.empresaId, {
+                    nombre: pedido.nombreComprador,
+                    correo: pedido.correoComprador,
+                    telefono: pedido.telefonoComprador,
+                    direccion: pedido.direccion,
+                    localidad: pedido.localidad,
+                    departamento: pedido.departamento,
                 });
+
                 for (const detalle of pedido.detalles) {
                     const producto = await tx.producto.findFirst({
                         where: {
@@ -805,6 +788,7 @@ export const createMarketplaceService = (
                         paypalOrderId: esperado.orderId,
                         paypalCaptureId: captura.id,
                         ventaId: venta.id,
+                        clienteId: cliente.id,
                         pagadaEn: new Date(),
                     },
                 });

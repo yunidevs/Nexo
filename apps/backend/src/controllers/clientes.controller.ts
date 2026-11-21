@@ -281,6 +281,31 @@ const createCustomerHandlers = (customerService: CustomerService) => {
         });
     };
 
+    const actividadComercial: RequestHandler = async (req, res) => {
+        const usuario = requireIdentity(req.usuario);
+        const resultado = await customerService.obtenerActividadComercial(
+            usuario.empresaId,
+            validateId(req.params.id),
+        );
+
+        res.json({
+            exito: true,
+            datos: resultado,
+        });
+    };
+
+    const listarDuplicados: RequestHandler = async (req, res) => {
+        const usuario = requireIdentity(req.usuario);
+        const resultado = await customerService.detectarDuplicados(
+            usuario.empresaId,
+        );
+
+        res.json({
+            exito: true,
+            datos: resultado,
+        });
+    };
+
     return {
         listar,
         crear,
@@ -288,6 +313,8 @@ const createCustomerHandlers = (customerService: CustomerService) => {
         actualizar,
         cambiarEstado,
         historial,
+        actividadComercial,
+        listarDuplicados,
     };
 };
 

@@ -56,6 +56,11 @@ enum EstadoVenta {
   CANCELADA
 }
 
+enum OrigenCliente {
+  MANUAL
+  MARKETPLACE
+}
+
 enum MetodoPago {
   EFECTIVO
   TARJETA
@@ -132,23 +137,30 @@ model PasswordResetToken {
 }
 
 model Cliente {
-  id            String             @id @default(uuid()) @db.Uuid
-  empresaId     String             @map("empresa_id") @db.Uuid
-  empresa       Empresa            @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  nombre        String             @db.VarChar(80)
-  apellido      String?            @db.VarChar(80)
-  documento     String?            @db.VarChar(40)
-  telefono      String?            @db.VarChar(40)
-  correo        String?            @db.VarChar(254)
-  direccion     String?            @db.VarChar(300)
-  activo        Boolean            @default(true)
-  creadaEn      DateTime           @default(now()) @map("creada_en")
-  actualizadaEn DateTime           @updatedAt @map("actualizada_en")
-  operaciones   OperacionCliente[]
-  ventas        Venta[]
+  id                   String               @id @default(uuid()) @db.Uuid
+  empresaId            String               @map("empresa_id") @db.Uuid
+  empresa              Empresa              @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  nombre               String               @db.VarChar(160)
+  apellido             String?              @db.VarChar(80)
+  documento            String?              @db.VarChar(40)
+  telefono             String?              @db.VarChar(40)
+  correo               String?              @db.VarChar(254)
+  correoNormalizado    String?              @map("correo_normalizado") @db.VarChar(254)
+  telefonoNormalizado  String?              @map("telefono_normalizado") @db.VarChar(20)
+  direccion            String?              @db.VarChar(600)
+  origen               OrigenCliente        @default(MANUAL)
+  posibleDuplicado     Boolean              @default(false) @map("posible_duplicado")
+  activo               Boolean              @default(true)
+  creadaEn             DateTime             @default(now()) @map("creada_en")
+  actualizadaEn        DateTime             @updatedAt @map("actualizada_en")
+  operaciones          OperacionCliente[]
+  ventas               Venta[]
+  pedidosMarketplace   PedidoMarketplace[]
 
   @@index([empresaId, creadaEn])
   @@index([empresaId, activo])
+  @@index([empresaId, correoNormalizado])
+  @@index([empresaId, telefonoNormalizado])
   @@map("clientes")
 }
 
@@ -412,6 +424,8 @@ model PedidoMarketplace {
   empresa           Empresa                    @relation(fields: [empresaId], references: [id], onDelete: Restrict)
   ventaId           String?                    @unique @map("venta_id") @db.Uuid
   venta             Venta?                     @relation(fields: [ventaId], references: [id], onDelete: SetNull)
+  clienteId         String?                    @map("cliente_id") @db.Uuid
+  cliente           Cliente?                   @relation(fields: [clienteId], references: [id], onDelete: Restrict)
   estado            EstadoPedidoMarketplace    @default(PENDIENTE_PAGO)
   nombreComprador   String                     @map("nombre_comprador") @db.VarChar(160)
   correoComprador   String                     @map("correo_comprador") @db.VarChar(254)
@@ -445,6 +459,7 @@ model PedidoMarketplace {
 
   @@index([empresaId, estado, creadaEn])
   @@index([estado, expiraEn])
+  @@index([clienteId, creadaEn])
   @@map("pedidos_marketplace")
 }
 
