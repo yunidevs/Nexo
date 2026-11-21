@@ -189,9 +189,11 @@ const clientePrueba = {
     correo: "ada@example.com",
     direccion: "",
     activo: true,
+    origen: "MANUAL",
+    posibleDuplicado: false,
     creadaEn: new Date("2026-01-01T00:00:00.000Z"),
     actualizadaEn: new Date("2026-01-01T00:00:00.000Z"),
-};
+} as any;
 
 const servicioClientesPrueba: CustomerService = {
     async listar(filtros): Promise<ResultadoClientes> {
@@ -234,6 +236,25 @@ const servicioClientesPrueba: CustomerService = {
                 totalPaginas: 0,
             },
         };
+    },
+    async obtenerActividadComercial(_empresaId, _clienteId) {
+        return {
+            totales: {
+                totalComprado: new Prisma.Decimal(0),
+                cantidadPedidos: 0,
+                ticketPromedio: new Prisma.Decimal(0),
+                ultimaCompra: null,
+                pedidosCompletados: 0,
+                pedidosPendientes: 0,
+            },
+            pedidosRecientes: [],
+        };
+    },
+    async detectarDuplicados(_empresaId) {
+        return [];
+    },
+    async resolverClienteCompra(_tx, _empresaId, _datos) {
+        return { id: clientePrueba.id };
     },
 };
 

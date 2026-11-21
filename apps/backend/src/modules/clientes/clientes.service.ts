@@ -123,18 +123,18 @@ export interface CustomerService {
     obtener(empresaId: string, id: string): Promise<ClientePublico>;
     crear(
         empresaId: string,
-        usuarioId: string,
+        usuarioId: string | null,
         datos: DatosCrearCliente,
     ): Promise<ClientePublico>;
     actualizar(
         empresaId: string,
-        usuarioId: string,
+        usuarioId: string | null,
         id: string,
         datos: DatosActualizarCliente,
     ): Promise<ClientePublico>;
     cambiarEstado(
         empresaId: string,
-        usuarioId: string,
+        usuarioId: string | null,
         id: string,
         activo: boolean,
     ): Promise<ClientePublico>;
@@ -189,7 +189,7 @@ const registrarOperacion = (
     tx: Prisma.TransactionClient,
     datos: {
         clienteId: string;
-        usuarioId: string;
+        usuarioId: string | null;
         tipo: TipoOperacionCliente;
         detalle: string;
     },
@@ -578,7 +578,12 @@ export const resolverClienteCompra = async (
     const telefonoNormalizado = normalizarTelefonoOpcional(datos.telefono);
 
     // 1. Intentar por correo
-    let cliente = await tx.cliente.findFirst({
+    let cliente: {
+        id: string;
+        correo: string | null;
+        telefono: string | null;
+        direccion: string | null;
+    } | null = await tx.cliente.findFirst({
         where: { empresaId, correoNormalizado },
         select: { id: true, correo: true, telefono: true, direccion: true },
     });
@@ -593,7 +598,7 @@ export const resolverClienteCompra = async (
         });
 
         if (candidatos.length === 1) {
-            cliente = candidatos[0];
+            cliente = candidatos[0] || null;
         } else if (candidatos.length > 1) {
             // Ambigüedad: marcaremos el nuevo como posible duplicado
             posibleDuplicado = true;
