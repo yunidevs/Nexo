@@ -97,7 +97,19 @@ const conexionTiendaSchema = z
 
 const estadoPedidoSchema = z
     .object({
-        estado: z.enum(["PREPARANDO", "ENVIADO", "ENTREGADO"]),
+        estado: z.enum([
+            "PREPARANDO",
+            "DESPACHADO",
+            "ENVIADO",
+            "EN_TRANSITO",
+            "EN_REPARTO",
+            "ENTREGADO",
+            "CANCELADO",
+            "INCIDENCIA",
+            "ENTREGA_FALLIDA",
+            "DEVUELTO",
+        ]),
+        observaciones: z.string().trim().max(1000).optional(),
     })
     .strict();
 
@@ -218,6 +230,31 @@ export const createMarketplaceController = (
         res.json({ exito: true, datos: { pedido } });
     };
 
+    const obtenerSeguimientoPublico: RequestHandler = async (req, res) => {
+        const token = z.string().min(1).safeParse(req.query.t);
+        if (!token.success) {
+            throw new AppError(
+                "ACCESO_DENEGADO",
+                "El token de seguimiento no es válido.",
+                403,
+            );
+        }
+        const seguimiento = await service.obtenerSeguimientoPedidoPublico(
+            validateId(req.params.id),
+            token.data,
+        );
+        res.json({ exito: true, datos: { seguimiento } });
+    };
+
+    const obtenerHistorialPedido: RequestHandler = async (req, res) => {
+        const usuario = requireIdentity(req.usuario);
+        const historial = await service.obtenerHistorialPedido(
+            usuario.empresaId,
+            validateId(req.params.id),
+        );
+        res.json({ exito: true, datos: { historial } });
+    };
+
     const solicitarCodigoVerificacion: RequestHandler = async (req, res) => {
         const resultado = codigoVerificacionSchema.safeParse(req.body);
         if (!resultado.success) {
@@ -280,6 +317,7 @@ export const createMarketplaceController = (
         const checkout = await service.crearCheckout(
             resultado.data,
             claveIdempotencia.data,
+            req.cuentaCliente?.id,
         );
         res.status(201).json({
             exito: true,
@@ -500,6 +538,8 @@ export const createMarketplaceController = (
             usuario.empresaId,
             validateId(req.params.id),
             resultado.data.estado,
+            usuario.id,
+            resultado.data.observaciones,
         );
         res.json({
             exito: true,
@@ -533,6 +573,8 @@ export const createMarketplaceController = (
         listarCategorias,
         obtenerProducto,
         obtenerPedidoPublico,
+        obtenerSeguimientoPublico,
+        obtenerHistorialPedido,
         solicitarCodigoVerificacion,
         verificarTelefono,
         crearCheckout,

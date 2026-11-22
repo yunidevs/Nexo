@@ -18,6 +18,7 @@ export function createDashboardRoutes(
             (id, empresaId) => authService.validarSesion(id, empresaId),
         ),
     );
+    router.get("/estadisticas", controller.obtenerEstadisticas);
     router.get("/", controller.obtenerResumen);
     return router;
 }

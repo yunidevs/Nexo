@@ -4,12 +4,14 @@ import { rateLimit } from "express-rate-limit";
 import type { AppConfig } from "../config.js";
 import { createAuthController } from "../controllers/auth.controller.js";
 import { createAuthMiddleware } from "../middleware/auth.middleware.js";
+import { createRedisRateLimitStore } from "../lib/rate-limit-store.js";
 import type { AuthService } from "../modules/auth/auth.service.js";
 
 function createAuthRateLimit() {
     return rateLimit({
         windowMs: 15 * 60 * 1000,
         limit: 10,
+        store: createRedisRateLimitStore(15 * 60 * 1000),
         standardHeaders: true,
         legacyHeaders: false,
         handler: (_req, res) => {

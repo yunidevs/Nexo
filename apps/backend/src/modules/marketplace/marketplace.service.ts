@@ -15,6 +15,7 @@ import {
 import { z } from "zod";
 import type { AppConfig } from "../../config.js";
 import { AppError } from "../../errors/app-error.js";
+import { redisGet, redisSet } from "../../lib/redis.js";
 import {
     convertirImportePayPal,
     createPayPalService,
@@ -37,6 +38,10 @@ import {
 } from "./whatsapp.service.js";
 import { resolverClienteCompra } from "../clientes/clientes.service.js";
 import { normalizarTelefono } from "../comun/telefono.js";
+import {
+    generarTokenSeguimiento,
+    verificarTokenSeguimiento,
+} from "../comun/crypto.js";
 
 const IMPORTE_MAXIMO = new Prisma.Decimal("9999999999.99");
 const VIGENCIA_PEDIDO_MS = 30 * 60 * 1000;
@@ -158,6 +163,29 @@ export interface EstadoPagoMarketplace {
     total: Prisma.Decimal;
     tienda: string;
     creadaEn: Date;
+    trackingUrl?: string;
+}
+
+export interface SeguimientoPedidoPublico {
+    id: string;
+    estado: EstadoPedidoMarketplace;
+    nombreComprador: string;
+    creadaEn: Date;
+    actualizadaEn: Date;
+    tienda: string;
+    detalles: {
+        nombre: string;
+        cantidad: number;
+    }[];
+    historial: {
+        estado: EstadoPedidoMarketplace;
+        detalle: string;
+        observaciones: string | null;
+        fecha: Date;
+        /// Solo lo expone el historial administrativo; el seguimiento público
+        /// no incluye el nombre del responsable.
+        responsable?: string | null;
+    }[];
 }
 
 export interface ResultadoPublicacionMarketplace {
@@ -215,6 +243,14 @@ export interface MarketplaceService {
     listarCategoriasPublicas(): Promise<CategoriaPublicaMarketplace[]>;
     obtenerProductoPublico(id: string): Promise<ProductoDetalleMarketplace>;
     obtenerPedidoPublico(id: string): Promise<EstadoPagoMarketplace>;
+    obtenerSeguimientoPedidoPublico(
+        id: string,
+        token: string,
+    ): Promise<SeguimientoPedidoPublico>;
+    obtenerHistorialPedido(
+        empresaId: string,
+        pedidoId: string,
+    ): Promise<SeguimientoPedidoPublico>;
     enviarCodigoVerificacionTelefono(
         telefono: string,
     ): Promise<CodigoVerificacionEnviado>;
@@ -222,6 +258,7 @@ export interface MarketplaceService {
     crearCheckout(
         datos: DatosCheckoutMarketplace,
         idempotencyKey: string,
+        cuentaClienteId?: string,
     ): Promise<{ pedidoId: string; urlPago: string }>;
     capturarPedido(
         pedidoId: string,
@@ -257,12 +294,15 @@ export interface MarketplaceService {
         empresaId: string,
         pedidoId: string,
         estado: EstadoPedidoMarketplace,
+        usuarioId?: string | null,
+        observaciones?: string,
     ): Promise<void>;
     reembolsarPedido(
         empresaId: string,
         usuarioId: string | null,
         pedidoId: string,
     ): Promise<EstadoPedidoMarketplace>;
+    liberarPedidosVencidos(): Promise<void>;
 }
 
 export function calcularComisionMarketplace(
@@ -280,7 +320,10 @@ const ESTADOS_PEDIDO_ABIERTOS = [
     EstadoPedidoMarketplace.PENDIENTE_PAGO,
     EstadoPedidoMarketplace.PAGO_CONFIRMADO,
     EstadoPedidoMarketplace.PREPARANDO,
+    EstadoPedidoMarketplace.DESPACHADO,
     EstadoPedidoMarketplace.ENVIADO,
+    EstadoPedidoMarketplace.EN_TRANSITO,
+    EstadoPedidoMarketplace.EN_REPARTO,
 ] as const;
 
 /**
@@ -542,6 +585,14 @@ export const createMarketplaceService = (
     const paypal = createPayPalService(config, fetcher);
     const whatsapp = createWhatsappService(config, fetcher);
 
+    // Las transacciones que confirman pagos o crean pedidos encadenan varias
+    // consultas; contra una base remota el timeout interactivo por defecto de
+    // Prisma (5 s) puede quedar corto y abortar la operación a mitad.
+    const OPCIONES_TRANSACCION = {
+        maxWait: 10_000,
+        timeout: 30_000,
+    } as const;
+
     // El código se guarda solo como HMAC para que un acceso a la base de
     // datos no exponga los códigos de 6 dígitos (fuerza bruta inviable).
     const hashCodigoVerificacion = (telefono: string, codigo: string) =>
@@ -613,6 +664,25 @@ export const createMarketplaceService = (
                 EstadoPedidoMarketplace.CANCELADO,
             );
         }
+    };
+
+    const registrarEventoSeguimiento = async (
+        tx: Prisma.TransactionClient,
+        pedidoId: string,
+        estado: EstadoPedidoMarketplace,
+        detalle: string,
+        observaciones?: string,
+        usuarioId?: string | null,
+    ) => {
+        await tx.seguimientoPedido.create({
+            data: {
+                pedidoId,
+                estado,
+                detalle,
+                ...(observaciones ? { observaciones } : {}),
+                ...(usuarioId ? { usuarioId } : {}),
+            },
+        });
     };
 
     const registrarPagoAprobado = async (
@@ -714,6 +784,16 @@ export const createMarketplaceService = (
                     departamento: pedido.departamento,
                 });
 
+                if (pedido.cuentaClienteId) {
+                    await tx.cliente.updateMany({
+                        where: {
+                            id: cliente.id,
+                            cuentaClienteId: null,
+                        },
+                        data: { cuentaClienteId: pedido.cuentaClienteId },
+                    });
+                }
+
                 for (const detalle of pedido.detalles) {
                     const producto = await tx.producto.findFirst({
                         where: {
@@ -792,7 +872,15 @@ export const createMarketplaceService = (
                         pagadaEn: new Date(),
                     },
                 });
-            });
+
+                await registrarEventoSeguimiento(
+                    tx,
+                    pedido.id,
+                    EstadoPedidoMarketplace.PAGO_CONFIRMADO,
+                    "Pago confirmado exitosamente vía PayPal.",
+                    `Orden PayPal: ${esperado.orderId}, Captura: ${captura.id}`,
+                );
+            }, OPCIONES_TRANSACCION);
         } catch (error) {
             if (
                 error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -946,8 +1034,18 @@ export const createMarketplaceService = (
                 where: { id: pedidoId },
                 data: { estado: EstadoPedidoMarketplace.REEMBOLSADO },
             });
+
+            await registrarEventoSeguimiento(
+                tx,
+                pedidoId,
+                EstadoPedidoMarketplace.REEMBOLSADO,
+                "El pedido ha sido reembolsado exitosamente.",
+                `Usuario: ${usuarioId ?? "Sistema"}`,
+                usuarioId,
+            );
+
             return EstadoPedidoMarketplace.REEMBOLSADO;
-        });
+        }, OPCIONES_TRANSACCION);
 
     const reembolsarTrasPagoSinStock = async (
         pedidoId: string,
@@ -1218,6 +1316,29 @@ export const createMarketplaceService = (
         },
 
         async listarCatalogo(filtros) {
+            // Caché opcional en Redis (TTL 60 s): el catálogo público es la
+            // lectura más frecuente y tolera datos de hace un minuto. Sin
+            // REDIS_URL se consulta la base de datos como siempre.
+            const claveCache = `catalogo:${JSON.stringify({
+                busqueda: filtros.busqueda ?? null,
+                categoria: filtros.categoria ?? null,
+                empresaSlug: filtros.empresaSlug ?? null,
+                precioMin: filtros.precioMin ?? null,
+                precioMax: filtros.precioMax ?? null,
+                soloDisponibles: filtros.soloDisponibles,
+                orden: filtros.orden,
+                pagina: filtros.pagina,
+                porPagina: filtros.porPagina,
+            })}`;
+            const cacheada = await redisGet(claveCache);
+            if (cacheada !== null) {
+                try {
+                    return JSON.parse(cacheada) as ResultadoCatalogoMarketplace;
+                } catch {
+                    // Entrada corrupta: se recalcula y se sobrescribe.
+                }
+            }
+
             const { where, orderBy } = condicionesCatalogo(filtros, prisma);
             const pagina = Math.max(1, Math.floor(filtros.pagina));
             const [productos, total] = await prisma.$transaction([
@@ -1230,13 +1351,15 @@ export const createMarketplaceService = (
                 }),
                 prisma.producto.count({ where }),
             ]);
-            return {
+            const resultado: ResultadoCatalogoMarketplace = {
                 productos: productos.map(mapearProductoCatalogo),
                 total,
                 pagina,
                 porPagina: filtros.porPagina,
                 totalPaginas: Math.max(1, Math.ceil(total / filtros.porPagina)),
             };
+            await redisSet(claveCache, JSON.stringify(resultado), 60);
+            return resultado;
         },
 
         async listarCategoriasPublicas() {
@@ -1315,12 +1438,108 @@ export const createMarketplaceService = (
                     404,
                 );
             }
+            const token = generarTokenSeguimiento(pedido.id, config.jwtSecret);
             return {
                 pedidoId: pedido.id,
                 estado: pedido.estado,
                 total: pedido.total,
                 tienda: pedido.empresa.nombre,
                 creadaEn: pedido.creadaEn,
+                trackingUrl: `/marketplace/seguimiento/${pedido.id}?t=${token}`,
+            };
+        },
+
+        async obtenerSeguimientoPedidoPublico(id, token) {
+            if (!verificarTokenSeguimiento(id, token, config.jwtSecret)) {
+                throw new AppError(
+                    "ACCESO_DENEGADO",
+                    "El enlace de seguimiento no es válido o ha expirado.",
+                    403,
+                );
+            }
+
+            const pedido = await prisma.pedidoMarketplace.findUnique({
+                where: { id },
+                include: {
+                    empresa: { select: { nombre: true } },
+                    detalles: {
+                        select: { nombre: true, cantidad: true },
+                    },
+                    historial: {
+                        orderBy: { creadaEn: "desc" },
+                    },
+                },
+            });
+
+            if (!pedido) {
+                throw new AppError(
+                    "PEDIDO_NO_ENCONTRADO",
+                    "El pedido no existe.",
+                    404,
+                );
+            }
+
+            return {
+                id: pedido.id,
+                estado: pedido.estado,
+                nombreComprador: pedido.nombreComprador,
+                creadaEn: pedido.creadaEn,
+                actualizadaEn: pedido.actualizadaEn,
+                tienda: pedido.empresa.nombre,
+                detalles: pedido.detalles,
+                historial: pedido.historial.map((h) => ({
+                    estado: h.estado,
+                    detalle: h.detalle,
+                    observaciones: h.observaciones,
+                    fecha: h.creadaEn,
+                })),
+            };
+        },
+
+        async obtenerHistorialPedido(empresaId, pedidoId) {
+            const pedido = await prisma.pedidoMarketplace.findFirst({
+                where: { id: pedidoId, empresaId },
+                include: {
+                    empresa: { select: { nombre: true } },
+                    detalles: {
+                        select: { nombre: true, cantidad: true },
+                    },
+                    historial: {
+                        orderBy: { creadaEn: "desc" },
+                        include: {
+                            usuario: {
+                                select: { nombre: true, apellido: true },
+                            },
+                        },
+                    },
+                },
+            });
+
+            if (!pedido) {
+                throw new AppError(
+                    "PEDIDO_NO_ENCONTRADO",
+                    "El pedido no existe.",
+                    404,
+                );
+            }
+
+            return {
+                id: pedido.id,
+                estado: pedido.estado,
+                nombreComprador: pedido.nombreComprador,
+                creadaEn: pedido.creadaEn,
+                actualizadaEn: pedido.actualizadaEn,
+                tienda: pedido.empresa.nombre,
+                detalles: pedido.detalles,
+                historial: pedido.historial.map((h) => ({
+                    estado: h.estado,
+                    detalle: h.detalle,
+                    observaciones: h.observaciones,
+                    fecha: h.creadaEn,
+                    responsable: h.usuario
+                        ? `${h.usuario.nombre} ${h.usuario.apellido}`.trim()
+                        : null,
+                })),
             };
         },
 
@@ -1436,7 +1655,7 @@ export const createMarketplaceService = (
             });
         },
 
-        async crearCheckout(datos, idempotencyKey) {
+        async crearCheckout(datos, idempotencyKey, cuentaClienteId) {
             await liberarPedidosVencidos();
             requirePayPalConfig(config);
             // El número de WhatsApp se registra como dato de contacto del
@@ -1727,6 +1946,7 @@ export const createMarketplaceService = (
                     return tx.pedidoMarketplace.create({
                         data: {
                             empresaId: empresa.id,
+                            cuentaClienteId: cuentaClienteId ?? null,
                             nombreComprador: datos.nombre,
                             correoComprador: datos.correo,
                             telefonoComprador: datos.telefono,
@@ -1759,7 +1979,7 @@ export const createMarketplaceService = (
                         },
                         include: { detalles: true },
                     });
-                });
+                }, OPCIONES_TRANSACCION);
             } catch (error) {
                 if (
                     error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -2221,37 +2441,111 @@ export const createMarketplaceService = (
             });
         },
 
-        async actualizarEstadoPedido(empresaId, pedidoId, estado) {
-            const estadosAnteriores =
-                estado === EstadoPedidoMarketplace.PREPARANDO
-                    ? [EstadoPedidoMarketplace.PAGO_CONFIRMADO]
-                    : estado === EstadoPedidoMarketplace.ENVIADO
-                      ? [EstadoPedidoMarketplace.PREPARANDO]
-                      : estado === EstadoPedidoMarketplace.ENTREGADO
-                        ? [EstadoPedidoMarketplace.ENVIADO]
-                        : [];
-            if (estadosAnteriores.length !== 1) {
-                throw new AppError(
-                    "ESTADO_PEDIDO_INVALIDO",
-                    "Solo puedes avanzar el pedido a preparación, envío o entrega.",
-                    400,
+        async actualizarEstadoPedido(
+            empresaId,
+            pedidoId,
+            estado,
+            usuarioId,
+            observaciones,
+        ) {
+            await prisma.$transaction(async (tx) => {
+                const pedido = await tx.pedidoMarketplace.findFirst({
+                    where: { id: pedidoId, empresaId },
+                    select: { id: true, estado: true },
+                });
+
+                if (!pedido) {
+                    throw new AppError(
+                        "PEDIDO_NO_ENCONTRADO",
+                        "El pedido no existe en esta empresa.",
+                        404,
+                    );
+                }
+
+                if (pedido.estado === estado) return;
+
+                // Definimos las transiciones válidas según el flujo del prompt
+                const transiciones: Record<string, EstadoPedidoMarketplace[]> = {
+                    [EstadoPedidoMarketplace.PAGO_CONFIRMADO]: [
+                        EstadoPedidoMarketplace.PREPARANDO,
+                        EstadoPedidoMarketplace.CANCELADO,
+                        EstadoPedidoMarketplace.INCIDENCIA,
+                    ],
+                    [EstadoPedidoMarketplace.PREPARANDO]: [
+                        EstadoPedidoMarketplace.DESPACHADO,
+                        EstadoPedidoMarketplace.CANCELADO,
+                        EstadoPedidoMarketplace.INCIDENCIA,
+                    ],
+                    [EstadoPedidoMarketplace.DESPACHADO]: [
+                        EstadoPedidoMarketplace.EN_TRANSITO,
+                        EstadoPedidoMarketplace.ENTREGADO,
+                        EstadoPedidoMarketplace.INCIDENCIA,
+                    ],
+                    // Los pedidos anteriores a la ampliación de estados siguen
+                    // en ENVIADO: se permiten las mismas salidas que DESPACHADO.
+                    [EstadoPedidoMarketplace.ENVIADO]: [
+                        EstadoPedidoMarketplace.EN_TRANSITO,
+                        EstadoPedidoMarketplace.ENTREGADO,
+                        EstadoPedidoMarketplace.INCIDENCIA,
+                    ],
+                    [EstadoPedidoMarketplace.EN_TRANSITO]: [
+                        EstadoPedidoMarketplace.EN_REPARTO,
+                        EstadoPedidoMarketplace.ENTREGA_FALLIDA,
+                        EstadoPedidoMarketplace.INCIDENCIA,
+                    ],
+                    [EstadoPedidoMarketplace.EN_REPARTO]: [
+                        EstadoPedidoMarketplace.ENTREGADO,
+                        EstadoPedidoMarketplace.ENTREGA_FALLIDA,
+                        EstadoPedidoMarketplace.INCIDENCIA,
+                    ],
+                    [EstadoPedidoMarketplace.ENTREGA_FALLIDA]: [
+                        EstadoPedidoMarketplace.EN_REPARTO,
+                        EstadoPedidoMarketplace.DEVUELTO,
+                        EstadoPedidoMarketplace.INCIDENCIA,
+                    ],
+                    [EstadoPedidoMarketplace.INCIDENCIA]: [
+                        EstadoPedidoMarketplace.PREPARANDO,
+                        EstadoPedidoMarketplace.DESPACHADO,
+                        EstadoPedidoMarketplace.EN_TRANSITO,
+                        EstadoPedidoMarketplace.EN_REPARTO,
+                        EstadoPedidoMarketplace.ENTREGADO,
+                        EstadoPedidoMarketplace.CANCELADO,
+                    ],
+                };
+
+                const permitidos = transiciones[pedido.estado] || [];
+                if (
+                    estado !== EstadoPedidoMarketplace.INCIDENCIA &&
+                    !permitidos.includes(estado)
+                ) {
+                    throw new AppError(
+                        "ESTADO_PEDIDO_INVALIDO",
+                        `No se permite cambiar el pedido de ${pedido.estado} a ${estado}.`,
+                        400,
+                    );
+                }
+
+                const actualizado = await tx.pedidoMarketplace.updateMany({
+                    where: { id: pedidoId, empresaId, estado: pedido.estado },
+                    data: { estado },
+                });
+                if (actualizado.count !== 1) {
+                    throw new AppError(
+                        "ESTADO_PEDIDO_INVALIDO",
+                        "El pedido cambió de estado mientras se actualizaba. Vuelve a intentarlo.",
+                        409,
+                    );
+                }
+
+                await registrarEventoSeguimiento(
+                    tx,
+                    pedidoId,
+                    estado,
+                    `El pedido ha pasado de ${pedido.estado.replace(/_/g, " ")} a ${estado.replace(/_/g, " ")}.`,
+                    observaciones,
+                    usuarioId ?? null,
                 );
-            }
-            const actualizado = await prisma.pedidoMarketplace.updateMany({
-                where: {
-                    id: pedidoId,
-                    empresaId,
-                    estado: { in: estadosAnteriores },
-                },
-                data: { estado },
             });
-            if (actualizado.count !== 1) {
-                throw new AppError(
-                    "PEDIDO_NO_ACTUALIZABLE",
-                    "El pedido no existe o su estado ya cambió.",
-                    409,
-                );
-            }
         },
 
         async reembolsarPedido(empresaId, usuarioId, pedidoId) {
@@ -2401,6 +2695,7 @@ export const createMarketplaceService = (
                 usuarioId,
             );
         },
+        liberarPedidosVencidos,
     };
 
     return service;

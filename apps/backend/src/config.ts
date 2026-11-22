@@ -90,6 +90,26 @@ const configSchema = z.object({
         .string()
         .regex(/^[a-z]{2}(?:-[A-Za-z]{2,4})?$/, "El idioma de la plantilla no es válido.")
         .default("es"),
+    // Los cortes del dashboard son locales (no UTC). Se valida contra ICU
+    // para rechazar zonas inexistentes al arrancar.
+    DASHBOARD_TIMEZONE: z
+        .string()
+        .trim()
+        .min(1)
+        .default("America/Montevideo")
+        .refine(
+            (zona) => {
+                try {
+                    new Intl.DateTimeFormat("en-US", {
+                        timeZone: zona,
+                    }).format(new Date());
+                    return true;
+                } catch {
+                    return false;
+                }
+            },
+            { message: "La zona horaria del dashboard no es válida." },
+        ),
 });
 
 export type AppConfig = {
@@ -116,6 +136,7 @@ export type AppConfig = {
     whatsappApiVersion: string;
     whatsappOtpTemplate: string;
     whatsappOtpTemplateLang: string;
+    dashboardTimezone: string;
 };
 
 export function loadConfig(
@@ -195,5 +216,6 @@ export function loadConfig(
         whatsappApiVersion: result.data.WHATSAPP_API_VERSION,
         whatsappOtpTemplate: result.data.WHATSAPP_OTP_TEMPLATE,
         whatsappOtpTemplateLang: result.data.WHATSAPP_OTP_TEMPLATE_LANG,
+        dashboardTimezone: result.data.DASHBOARD_TIMEZONE,
     };
 }

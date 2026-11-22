@@ -39,6 +39,7 @@ const configPrueba: AppConfig = {
     whatsappApiVersion: "v23.0",
     whatsappOtpTemplate: "",
     whatsappOtpTemplateLang: "es",
+    dashboardTimezone: "America/Montevideo",
 };
 
 const configWhatsappPrueba: AppConfig = {
@@ -577,7 +578,12 @@ describe("marketplace payment helpers", () => {
                 findFirst: async () => ({ id: "producto-1", stock: 5 }),
                 updateMany: async () => ({ count: 1 }),
             },
-            cliente: { create: async () => ({ id: "cliente-1" }) },
+            cliente: {
+                findFirst: async () => null,
+                findMany: async () => [],
+                create: async () => ({ id: "cliente-1" }),
+            },
+            seguimientoPedido: { create: async () => ({}) },
             movimientoInventario: { create: async () => ({}) },
             venta: {
                 create: async (args: { data: Record<string, unknown> }) => {
@@ -1101,5 +1107,87 @@ describe("verificación del teléfono por WhatsApp", () => {
             () => servicio.enviarCodigoVerificacionTelefono("59899123456"),
             { codigo: "WHATSAPP_NO_CONFIGURADO" },
         );
+    });
+});
+
+describe("seguimiento de pedidos", () => {
+    function prismaTransicion(estadoActual: EstadoPedidoMarketplace) {
+        const eventos: Record<string, unknown>[] = [];
+        const tx = {
+            pedidoMarketplace: {
+                findFirst: async () => ({
+                    id: PEDIDO_ID,
+                    estado: estadoActual,
+                }),
+                updateMany: async () => ({ count: 1 }),
+            },
+            seguimientoPedido: {
+                create: async (args: {
+                    data: Record<string, unknown>;
+                }) => {
+                    eventos.push(args.data);
+                    return {};
+                },
+            },
+        };
+        const prisma = {
+            $transaction: async (
+                fn: (cliente: typeof tx) => Promise<unknown>,
+            ) => fn(tx),
+        } as unknown as PrismaClient;
+        return { prisma, eventos };
+    }
+
+    it("registra la transición con observaciones y usuario responsable", async () => {
+        const { prisma, eventos } = prismaTransicion(
+            EstadoPedidoMarketplace.PAGO_CONFIRMADO,
+        );
+        const servicio = createMarketplaceService(
+            prisma,
+            configPrueba,
+            async () => {
+                throw new Error("No debe llamarse a la red.");
+            },
+        );
+
+        await servicio.actualizarEstadoPedido(
+            "empresa-1",
+            PEDIDO_ID,
+            EstadoPedidoMarketplace.PREPARANDO,
+            "usuario-1",
+            "Se confirmó el stock con el almacén.",
+        );
+
+        assert.equal(eventos.length, 1);
+        assert.equal(eventos[0]?.estado, EstadoPedidoMarketplace.PREPARANDO);
+        assert.equal(
+            eventos[0]?.observaciones,
+            "Se confirmó el stock con el almacén.",
+        );
+        assert.equal(eventos[0]?.usuarioId, "usuario-1");
+    });
+
+    it("rechaza una transición no permitida por la máquina de estados", async () => {
+        const { prisma, eventos } = prismaTransicion(
+            EstadoPedidoMarketplace.PENDIENTE_PAGO,
+        );
+        const servicio = createMarketplaceService(
+            prisma,
+            configPrueba,
+            async () => {
+                throw new Error("No debe llamarse a la red.");
+            },
+        );
+
+        await assert.rejects(
+            () =>
+                servicio.actualizarEstadoPedido(
+                    "empresa-1",
+                    PEDIDO_ID,
+                    EstadoPedidoMarketplace.ENTREGADO,
+                ),
+            { codigo: "ESTADO_PEDIDO_INVALIDO" },
+        );
+        assert.equal(eventos.length, 0);
     });
 });

@@ -6,6 +6,7 @@ import helmet from "helmet";
 
 import { loadConfig, type AppConfig } from "./config.js";
 import { prisma } from "./database.js";
+import { redisPing, redisUrl } from "./lib/redis.js";
 import { AppError } from "./errors/app-error.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import {
@@ -68,25 +69,65 @@ import {
     type MarketplaceService,
 } from "./modules/marketplace/marketplace.service.js";
 import { createMarketplaceRoutes } from "./routes/marketplace.routes.js";
+import {
+    createClienteCuentaService,
+    type ClienteCuentaService,
+} from "./modules/cuenta-cliente/cuenta-cliente.service.js";
+import { createClienteCuentaRoutes } from "./routes/cuenta-cliente.routes.js";
 
-export const createApp = (
-    config: AppConfig = loadConfig(),
-    authService: AuthService = createAuthService(prisma, config.jwtSecret, config),
-    customerService: CustomerService = createCustomerService(prisma),
-    userService: UserService = createUserService(prisma),
-    companyService: CompanyService = createCompanyService(prisma),
-    supplierService: SupplierService = createSupplierService(prisma),
-    productService: ProductService = createProductService(prisma),
-    inventoryService: InventoryService = createInventoryService(prisma),
-    categoryService: CategoryService = createCategoryService(prisma),
-    purchaseService: PurchaseService = createPurchaseService(prisma),
-    salesService: SalesService = createSalesService(prisma),
-    dashboardService: DashboardService = createDashboardService(prisma),
-    marketplaceService: MarketplaceService = createMarketplaceService(
-        prisma,
-        config,
-    ),
-) => {
+/**
+ * Dependencias inyectables de la aplicación. Todas son opcionales: si no se
+ * proporcionan, se construyen con los valores por defecto (Prisma real +
+ * config cargada del entorno). Los tests pasan dobles de servicio por nombre,
+ * lo que evita el error clásico de argumentos posicionales en desorden.
+ */
+export interface AppDependencies {
+    config?: AppConfig;
+    authService?: AuthService;
+    customerService?: CustomerService;
+    userService?: UserService;
+    companyService?: CompanyService;
+    supplierService?: SupplierService;
+    productService?: ProductService;
+    inventoryService?: InventoryService;
+    categoryService?: CategoryService;
+    purchaseService?: PurchaseService;
+    salesService?: SalesService;
+    dashboardService?: DashboardService;
+    marketplaceService?: MarketplaceService;
+    clienteCuentaService?: ClienteCuentaService;
+}
+
+export const createApp = (deps: AppDependencies = {}) => {
+    const config = deps.config ?? loadConfig();
+    const authService =
+        deps.authService ??
+        createAuthService(prisma, config.jwtSecret, config);
+    const customerService =
+        deps.customerService ?? createCustomerService(prisma);
+    const userService = deps.userService ?? createUserService(prisma);
+    const companyService =
+        deps.companyService ?? createCompanyService(prisma);
+    const supplierService =
+        deps.supplierService ?? createSupplierService(prisma);
+    const productService =
+        deps.productService ?? createProductService(prisma);
+    const inventoryService =
+        deps.inventoryService ?? createInventoryService(prisma);
+    const categoryService =
+        deps.categoryService ?? createCategoryService(prisma);
+    const purchaseService =
+        deps.purchaseService ?? createPurchaseService(prisma);
+    const salesService = deps.salesService ?? createSalesService(prisma);
+    const dashboardService =
+        deps.dashboardService ??
+        createDashboardService(prisma, config.dashboardTimezone);
+    const marketplaceService =
+        deps.marketplaceService ?? createMarketplaceService(prisma, config);
+    const clienteCuentaService =
+        deps.clienteCuentaService ??
+        createClienteCuentaService(prisma, config.jwtSecret, config);
+
     const app = express();
     
     app.set("trust proxy", 1);
@@ -142,6 +183,35 @@ export const createApp = (
         });
     });
 
+    // Readiness real: verifica que la API pueda consultar la base de datos.
+    // Los balanceadores y orchestradores deben usar esta ruta; si Postgres
+    // no responde, devuelve 503 para dejar de enviar tráfico a la instancia.
+    app.get("/api/listo", async (_req, res, next) => {
+        try {
+            const [baseDatos, redis] = await Promise.all([
+                prisma.$queryRaw`SELECT 1`.then(() => "conectada"),
+                redisUrl()
+                    ? redisPing().then((ok) =>
+                          ok ? "conectado" : "no_disponible",
+                      )
+                    : Promise.resolve("no_configurado"),
+            ]);
+            res.json({
+                exito: true,
+                datos: { estado: "listo", baseDatos, redis },
+                mensaje: "La API está lista para recibir tráfico.",
+            });
+        } catch {
+            next(
+                new AppError(
+                    "SERVICIO_NO_DISPONIBLE",
+                    "La API no puede conectar con la base de datos.",
+                    503,
+                ),
+            );
+        }
+    });
+
     // Rutas de la aplicación
     app.use("/api/autenticacion", createAuthRoutes(config, authService));
     app.use(
@@ -186,7 +256,16 @@ export const createApp = (
     );
     app.use(
         "/api/marketplace",
-        createMarketplaceRoutes(config, marketplaceService, authService),
+        createMarketplaceRoutes(
+            config,
+            marketplaceService,
+            authService,
+            clienteCuentaService,
+        ),
+    );
+    app.use(
+        "/api/cuenta-clientes",
+        createClienteCuentaRoutes(config, clienteCuentaService),
     );
 
     // Ruta no encontrada

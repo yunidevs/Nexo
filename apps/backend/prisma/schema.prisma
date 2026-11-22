@@ -37,11 +37,20 @@ enum TipoMovimientoInventario {
 
 enum EstadoPedidoMarketplace {
   PENDIENTE_PAGO
+  PAGO_RECHAZADO
   PAGO_CONFIRMADO
   PREPARANDO
+  DESPACHADO
+  /// Valor conservado para pedidos creados antes de ampliar los estados.
+  /// La máquina de estados lo trata como alias heredado de DESPACHADO.
   ENVIADO
+  EN_TRANSITO
+  EN_REPARTO
   ENTREGADO
   CANCELADO
+  INCIDENCIA
+  ENTREGA_FALLIDA
+  DEVUELTO
   REEMBOLSADO
   REEMBOLSO_PENDIENTE
 }
@@ -119,6 +128,7 @@ model Usuario {
   ventasCanceladas        Venta[]                  @relation("VentaCancelador")
   pagosVentas             PagoVenta[]
   estadosOAuthMarketplace EstadoOAuthMarketplace[]
+  seguimientoPedidos      SeguimientoPedido[]
 
   @@index([empresaId])
   @@map("usuarios")
@@ -150,6 +160,8 @@ model Cliente {
   direccion            String?              @db.VarChar(600)
   origen               OrigenCliente        @default(MANUAL)
   posibleDuplicado     Boolean              @default(false) @map("posible_duplicado")
+  cuentaClienteId      String?              @map("cuenta_cliente_id") @db.Uuid
+  cuentaCliente        CuentaCliente?       @relation(fields: [cuentaClienteId], references: [id], onDelete: SetNull)
   activo               Boolean              @default(true)
   creadaEn             DateTime             @default(now()) @map("creada_en")
   actualizadaEn        DateTime             @updatedAt @map("actualizada_en")
@@ -161,7 +173,45 @@ model Cliente {
   @@index([empresaId, activo])
   @@index([empresaId, correoNormalizado])
   @@index([empresaId, telefonoNormalizado])
+  @@index([cuentaClienteId])
   @@map("clientes")
+}
+
+/// Cuenta de acceso de compradores del marketplace. Es global (no pertenece
+/// a una empresa) y se vincula opcionalmente a los clientes comerciales de
+/// cada empresa y a los pedidos realizados con sesión iniciada.
+model CuentaCliente {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  correo              String                     @unique @db.VarChar(254)
+  correoNormalizado   String                     @unique @map("correo_normalizado") @db.VarChar(254)
+  nombre              String                     @db.VarChar(80)
+  apellido            String?                    @db.VarChar(80)
+  contrasenaHash      String                     @map("contrasena_hash") @db.VarChar(255)
+  telefono            String?                    @db.VarChar(40)
+  telefonoNormalizado String?                    @map("telefono_normalizado") @db.VarChar(20)
+  direccion           String?                    @db.VarChar(600)
+  activo              Boolean                    @default(true)
+  creadaEn            DateTime                   @default(now()) @map("creada_en")
+  actualizadaEn       DateTime                   @updatedAt @map("actualizada_en")
+  tokenRecuperacion   ClientePasswordResetToken?
+  clientes            Cliente[]
+  pedidos             PedidoMarketplace[]
+
+  @@index([correoNormalizado])
+  @@index([telefonoNormalizado])
+  @@map("cuentas_clientes")
+}
+
+model ClientePasswordResetToken {
+  id        String       @id @default(uuid()) @db.Uuid
+  cuentaId  String       @unique @map("cuenta_id") @db.Uuid
+  cuenta    CuentaCliente @relation(fields: [cuentaId], references: [id], onDelete: Cascade)
+  tokenHash String       @unique @map("token_hash") @db.VarChar(64)
+  expiresAt DateTime     @map("expira_en")
+  createdAt DateTime     @default(now()) @map("creado_en")
+
+  @@index([expiresAt])
+  @@map("tokens_recuperacion_cuenta_cliente")
 }
 
 model OperacionCliente {
@@ -225,6 +275,7 @@ model Producto {
   @@index([empresaId, creadaEn])
   @@index([empresaId, activo])
   @@index([empresaId, categoria])
+  @@index([empresaId, publicadoMarketplace, activo])
   @@map("productos")
 }
 
@@ -426,6 +477,8 @@ model PedidoMarketplace {
   venta             Venta?                     @relation(fields: [ventaId], references: [id], onDelete: SetNull)
   clienteId         String?                    @map("cliente_id") @db.Uuid
   cliente           Cliente?                   @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  cuentaClienteId   String?                    @map("cuenta_cliente_id") @db.Uuid
+  cuentaCliente     CuentaCliente?             @relation(fields: [cuentaClienteId], references: [id], onDelete: SetNull)
   estado            EstadoPedidoMarketplace    @default(PENDIENTE_PAGO)
   nombreComprador   String                     @map("nombre_comprador") @db.VarChar(160)
   correoComprador   String                     @map("correo_comprador") @db.VarChar(254)
@@ -453,13 +506,15 @@ model PedidoMarketplace {
   paypalRefundId    String?                    @unique @map("paypal_refund_id") @db.VarChar(100)
   expiraEn          DateTime                   @map("expira_en")
   pagadaEn          DateTime?                  @map("pagada_en")
-  creadaEn          DateTime                   @default(now()) @map("creada_en")
-  actualizadaEn     DateTime                   @updatedAt @map("actualizada_en")
-  detalles          DetallePedidoMarketplace[]
+  creadaEn               DateTime                   @default(now()) @map("creada_en")
+  actualizadaEn          DateTime                   @updatedAt @map("actualizada_en")
+  detalles               DetallePedidoMarketplace[]
+  historial              SeguimientoPedido[]
 
   @@index([empresaId, estado, creadaEn])
   @@index([estado, expiraEn])
   @@index([clienteId, creadaEn])
+  @@index([cuentaClienteId, creadaEn])
   @@map("pedidos_marketplace")
 }
 
@@ -510,4 +565,20 @@ model CodigoVerificacionTelefono {
   @@index([telefono, creadaEn])
   @@index([telefono, verificadoEn])
   @@map("codigos_verificacion_telefono")
+}
+
+model SeguimientoPedido {
+  id            String                  @id @default(uuid()) @db.Uuid
+  pedidoId      String                  @map("pedido_id") @db.Uuid
+  pedido        PedidoMarketplace       @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  estado        EstadoPedidoMarketplace
+  detalle       String                  @db.VarChar(500)
+  observaciones String?                 @db.VarChar(1000)
+  usuarioId     String?                 @map("usuario_id") @db.Uuid
+  usuario       Usuario?                @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  creadaEn      DateTime                @default(now()) @map("creada_en")
+
+  @@index([pedidoId, creadaEn])
+  @@index([usuarioId])
+  @@map("seguimiento_pedidos")
 }

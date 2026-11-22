@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import { AppError } from "../../errors/app-error.js";
+import { redisGet, redisIncr, redisSet } from "../../lib/redis.js";
 
 export interface DatosCrearProducto {
     sku: string;
@@ -375,13 +376,79 @@ export const eliminarProducto = async (
     };
 };
 
+/**
+ * Caché del listado de productos del ERP en Redis (TTL 60 s).
+ *
+ * La clave incluye una versión por empresa (`prodver:{empresaId}`) que se
+ * incrementa en cada mutación de producto: los cambios se reflejan de
+ * inmediato sin necesidad de borrar claves una a una, y las entradas
+ * viejas expiran por TTL. Sin REDIS_URL todo funciona consultando la base
+ * de datos como antes.
+ */
+const CLAVE_VERSION = (empresaId: string) => `prodver:${empresaId}`;
+
+const invalidarCacheProductos = async (empresaId: string): Promise<void> => {
+    await redisIncr(CLAVE_VERSION(empresaId));
+};
+
+const listarProductosConCache = async (
+    prisma: PrismaClient,
+    filtros: FiltrosProductos,
+): Promise<ResultadoProductos> => {
+    const version =
+        (await redisGet(CLAVE_VERSION(filtros.empresaId))) ?? "0";
+    const clave = `prodlist:${filtros.empresaId}:v${version}:${JSON.stringify({
+        buscar: filtros.buscar || null,
+        activo: filtros.activo ?? null,
+        pagina: filtros.pagina,
+        limite: filtros.limite,
+    })}`;
+
+    const cacheada = await redisGet(clave);
+    if (cacheada !== null) {
+        try {
+            return JSON.parse(cacheada) as ResultadoProductos;
+        } catch {
+            // Entrada corrupta: se recalcula y se sobrescribe.
+        }
+    }
+
+    const resultado = await listarProductos(prisma, filtros);
+    await redisSet(clave, JSON.stringify(resultado), 60);
+    return resultado;
+};
+
 export const createProductService = (prisma: PrismaClient): ProductService => ({
-    listar: (filtros) => listarProductos(prisma, filtros),
+    listar: (filtros) => listarProductosConCache(prisma, filtros),
     obtener: (empresaId, id) => obtenerProducto(prisma, empresaId, id),
-    crear: (empresaId, datos) => crearProducto(prisma, empresaId, datos),
-    actualizar: (empresaId, id, datos) =>
-        actualizarProducto(prisma, empresaId, id, datos),
-    cambiarEstado: (empresaId, id, activo) =>
-        cambiarEstadoProducto(prisma, empresaId, id, activo),
-    eliminar: (empresaId, id) => eliminarProducto(prisma, empresaId, id),
+    crear: async (empresaId, datos) => {
+        const producto = await crearProducto(prisma, empresaId, datos);
+        await invalidarCacheProductos(empresaId);
+        return producto;
+    },
+    actualizar: async (empresaId, id, datos) => {
+        const producto = await actualizarProducto(
+            prisma,
+            empresaId,
+            id,
+            datos,
+        );
+        await invalidarCacheProductos(empresaId);
+        return producto;
+    },
+    cambiarEstado: async (empresaId, id, activo) => {
+        const producto = await cambiarEstadoProducto(
+            prisma,
+            empresaId,
+            id,
+            activo,
+        );
+        await invalidarCacheProductos(empresaId);
+        return producto;
+    },
+    eliminar: async (empresaId, id) => {
+        const resultado = await eliminarProducto(prisma, empresaId, id);
+        await invalidarCacheProductos(empresaId);
+        return resultado;
+    },
 });

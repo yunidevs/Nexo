@@ -3,9 +3,10 @@ import { Rol, type PrismaClient } from "@prisma/client";
 import { compare, hash } from "bcryptjs";
 import { createHash, randomBytes } from "node:crypto";
 import { SignJWT } from "jose";
-import nodemailer from "nodemailer";
 
 import { AppError } from "../../errors/app-error.js";
+import { enviarCorreo } from "../../lib/correo.js";
+import { redisGet, redisSet } from "../../lib/redis.js";
 
 // ============================================================
 // CONFIGURACIÓN
@@ -231,44 +232,14 @@ export const solicitarRecuperacion = async (
     const link = resetUrl.toString();
     const nombreHtml = escapeHtml(usuario.nombre);
 
-    try {
-        const transport = nodemailer.createTransport({
-            host: config.mailtrapSmtpHost,
-            port: config.mailtrapSmtpPort,
-            secure: config.mailtrapSmtpPort === 465,
-            auth: {
-                user: config.mailtrapSmtpUser,
-                pass: config.mailtrapSmtpPass,
-            },
-        });
-
-        await transport.sendMail({
-            from: {
-                address: config.mailtrapFromEmail,
-                name: config.mailtrapFromName ?? "NexoERP",
-            },
-            to: usuario.correo,
-            subject: "Recupera tu contraseña de NexoERP",
-            text: `Hola ${usuario.nombre}, usa este enlace para crear una nueva contraseña: ${link}\n\nEl enlace vence en una hora. Si no solicitaste este cambio, ignora este correo.`,
-            html: `<p>Hola ${nombreHtml},</p><p>Recibimos una solicitud para cambiar la contraseña de tu cuenta de NexoERP.</p><p><a href="${link.replaceAll("&", "&amp;")}">Crear nueva contraseña</a></p><p>El enlace vence en una hora. Si no solicitaste este cambio, ignora este correo.</p>`,
-        });
-    } catch (error) {
-        console.error(
-            JSON.stringify({
-                nivel: "error",
-                mensaje: "mailtrap_no_disponible",
-                error:
-                    error instanceof Error
-                        ? error.message
-                        : "Error desconocido",
-            }),
-        );
-        throw new AppError(
-            "EMAIL_NO_DISPONIBLE",
-            "No se pudo enviar el correo de recuperación. Inténtalo más tarde.",
-            502,
-        );
-    }
+    // Con REDIS_URL el correo se encola en BullMQ y lo envía el worker;
+    // sin Redis se envía de forma síncrona (comportamiento original).
+    await enviarCorreo(config, {
+        destinatario: usuario.correo,
+        asunto: "Recupera tu contraseña de NexoERP",
+        texto: `Hola ${usuario.nombre}, usa este enlace para crear una nueva contraseña: ${link}\n\nEl enlace vence en una hora. Si no solicitaste este cambio, ignora este correo.`,
+        html: `<p>Hola ${nombreHtml},</p><p>Recibimos una solicitud para cambiar la contraseña de tu cuenta de NexoERP.</p><p><a href="${link.replaceAll("&", "&amp;")}">Crear nueva contraseña</a></p><p>El enlace vence en una hora. Si no solicitaste este cambio, ignora este correo.</p>`,
+    });
 };
 
 export const restablecerContrasena = async (
@@ -416,7 +387,24 @@ export const createAuthService = (
     solicitarRecuperacion: (correo) =>
         solicitarRecuperacion(prisma, correo, recoveryConfig),
     restablecerContrasena: (datos) => restablecerContrasena(prisma, datos),
-    validarSesion: (id, empresaId) => validarSesion(prisma, id, empresaId),
+    validarSesion: async (id, empresaId) => {
+        // Caché Redis opcional: evita una query a la base de datos en cada
+        // request autenticado. Solo se cachean sesiones válidas (TTL 5 min);
+        // los cambios de rol/estado invalidan la clave en usuarios.service.
+        // Sin REDIS_URL configurada, redisGet devuelve null y se consulta
+        // siempre la base de datos (comportamiento original).
+        const clave = `sesion:${id}:${empresaId}`;
+        const cacheada = await redisGet(clave);
+        if (cacheada && rolesPermitidos.has(cacheada as Rol)) {
+            return cacheada as Rol;
+        }
+
+        const rol = await validarSesion(prisma, id, empresaId);
+        if (rol) {
+            await redisSet(clave, rol, 300);
+        }
+        return rol;
+    },
     obtenerPerfil: (id, empresaId) => obtenerPerfil(prisma, id, empresaId),
     createToken: (usuario) => createToken(usuario, jwtSecret),
 });

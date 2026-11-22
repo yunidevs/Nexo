@@ -1,6 +1,7 @@
 import { Prisma, Rol, type PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { AppError } from "../../errors/app-error.js";
+import { redisDel } from "../../lib/redis.js";
 
 const hashRounds = 12;
 
@@ -276,7 +277,12 @@ const cambiarRolOEstado = async (
             return usuarioActualizado;
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-    );
+    ).then(async (actualizado) => {
+        // Invalida la sesión cacheada en Redis para que el cambio de
+        // rol/estado tenga efecto inmediato en la próxima petición.
+        await redisDel(`sesion:${id}:${empresaId}`);
+        return actualizado;
+    });
 
 export const cambiarRolUsuario = (
     prisma: PrismaClient,

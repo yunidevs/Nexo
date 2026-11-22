@@ -34,6 +34,7 @@ import type {
 import type {
     DashboardService,
     DashboardResumen,
+    EstadisticasDashboard,
 } from "./modules/dashboard/dashboard.service.js";
 import type {
     DatosCrearVenta,
@@ -309,10 +310,61 @@ const dashboardPrueba: DashboardResumen = {
     productosMasVendidos: [],
 };
 const empresasDashboardConsultadas: string[] = [];
+const periodosEstadisticasConsultados: Array<{
+    empresaId: string;
+    periodo: string;
+    fecha?: string;
+}> = [];
+const estadisticasPrueba: EstadisticasDashboard = {
+    periodo: "semana",
+    zonaHoraria: "America/Montevideo",
+    desde: "2026-11-16T03:00:00.000Z",
+    hasta: "2026-11-23T03:00:00.000Z",
+    anterior: {
+        desde: "2026-11-09T03:00:00.000Z",
+        hasta: "2026-11-16T03:00:00.000Z",
+    },
+    cubos: [
+        {
+            clave: "2026-11-16T00:00:00",
+            etiqueta: "lun 16",
+            desde: "2026-11-16T03:00:00.000Z",
+            hasta: "2026-11-17T03:00:00.000Z",
+            metricas: {
+                ventas: "100.00",
+                pedidos: 1,
+                unidades: 2,
+                ingresos: "100.00",
+            },
+        },
+    ],
+    totales: {
+        ventas: "100.00",
+        pedidos: 1,
+        unidades: 2,
+        ingresos: "100.00",
+    },
+    comparacion: {
+        ventas: { actual: "100.00", anterior: "50.00", variacion: 100 },
+        pedidos: { actual: "1", anterior: "1", variacion: 0 },
+        unidades: { actual: "2", anterior: "0", variacion: null },
+        ingresos: { actual: "100.00", anterior: "50.00", variacion: 100 },
+    },
+    estadoPedidos: { abiertos: 1, completados: 0, incidencias: 0 },
+    generadoEn: "2026-11-21T12:00:00.000Z",
+};
 const servicioDashboardPrueba: DashboardService = {
     async obtenerResumen(empresaId) {
         empresasDashboardConsultadas.push(empresaId);
         return dashboardPrueba;
+    },
+    async obtenerEstadisticas(empresaId, periodo, fecha) {
+        periodosEstadisticasConsultados.push({
+            empresaId,
+            periodo,
+            ...(fecha ? { fecha } : {}),
+        });
+        return estadisticasPrueba;
     },
 };
 const ventaPrueba: VentaPublica = {
@@ -383,6 +435,7 @@ const servicioVentasPrueba: SalesService = {
 };
 
 const app = createApp({
+    config: {
     environment: "test",
     port: 4000,
     corsOrigin: "http://localhost:3000",
@@ -398,7 +451,9 @@ const app = createApp({
     whatsappApiVersion: "v23.0",
     whatsappOtpTemplate: "",
     whatsappOtpTemplateLang: "es",
-}, {
+    dashboardTimezone: "America/Montevideo",
+    },
+    authService: {
     async registrar(datos) {
         registros.push(datos.correo);
         return usuarioPrueba;
@@ -438,7 +493,14 @@ const app = createApp({
     async createToken() {
         return createTestToken();
     },
-}, servicioClientesPrueba, servicioUsuariosPrueba, servicioEmpresasPrueba, undefined, undefined, undefined, servicioCategoriasPrueba, undefined, servicioVentasPrueba, servicioDashboardPrueba);
+    },
+    customerService: servicioClientesPrueba,
+    userService: servicioUsuariosPrueba,
+    companyService: servicioEmpresasPrueba,
+    categoryService: servicioCategoriasPrueba,
+    salesService: servicioVentasPrueba,
+    dashboardService: servicioDashboardPrueba,
+});
 
 let servidor: Server;
 let urlBase: string;
@@ -482,6 +544,44 @@ it("entrega el resumen del dashboard de la empresa autenticada", async () => {
     assert.deepEqual((await respuesta.json()).datos, dashboardPrueba);
 
     const sinSesion = await fetch(`${urlBase}/api/dashboard`);
+    assert.equal(sinSesion.status, 401);
+});
+
+it("entrega estadísticas por período usando la empresa de la sesión", async () => {
+    const token = await createTestToken();
+    periodosEstadisticasConsultados.length = 0;
+
+    const respuesta = await fetch(
+        `${urlBase}/api/dashboard/estadisticas?periodo=semana&fecha=2026-11-21`,
+        { headers: { cookie: `nexo_sesion=${token}` } },
+    );
+
+    assert.equal(respuesta.status, 200);
+    assert.equal(respuesta.headers.get("cache-control"), "private, max-age=30");
+    assert.deepEqual(periodosEstadisticasConsultados, [
+        {
+            empresaId: usuarioPrueba.empresaId,
+            periodo: "semana",
+            fecha: "2026-11-21",
+        },
+    ]);
+    assert.deepEqual((await respuesta.json()).datos, estadisticasPrueba);
+
+    const periodoInvalido = await fetch(
+        `${urlBase}/api/dashboard/estadisticas?periodo=anual`,
+        { headers: { cookie: `nexo_sesion=${token}` } },
+    );
+    assert.equal(periodoInvalido.status, 400);
+
+    const fechaInvalida = await fetch(
+        `${urlBase}/api/dashboard/estadisticas?periodo=dia&fecha=2026-02-31`,
+        { headers: { cookie: `nexo_sesion=${token}` } },
+    );
+    assert.equal(fechaInvalida.status, 400);
+
+    const sinSesion = await fetch(
+        `${urlBase}/api/dashboard/estadisticas?periodo=dia`,
+    );
     assert.equal(sinSesion.status, 401);
 });
 
@@ -1087,6 +1187,7 @@ describe("API base", () => {
                 whatsappApiVersion: "v23.0",
                 whatsappOtpTemplate: "",
                 whatsappOtpTemplateLang: "es",
+                dashboardTimezone: "America/Montevideo",
             },
         );
 
@@ -1116,6 +1217,7 @@ describe("API base", () => {
                 whatsappApiVersion: "v23.0",
                 whatsappOtpTemplate: "",
                 whatsappOtpTemplateLang: "es",
+                dashboardTimezone: "America/Montevideo",
             },
         );
 
