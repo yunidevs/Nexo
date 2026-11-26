@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 
 interface Cliente {
     id: string;
@@ -490,38 +491,32 @@ export default function PaginaClientes() {
     return (
         <>
             <div className="mx-auto w-full max-w-6xl">
-                <header className="flex flex-col justify-between gap-5 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-end">
-                    <div>
-                        <p className="text-sm font-medium text-indigo-300">
-                            Directorio
-                        </p>
-                        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                            Clientes
-                        </h1>
-                        <p className="mt-2 text-sm text-slate-400">
-                            Administra los contactos de tu empresa.
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
-                        <p className="text-sm text-slate-500">
-                            {paginacion.total}{" "}
-                            {paginacion.total === 1 ? "cliente" : "clientes"}
-                        </p>
-                        <button
-                            type="button"
-                            onClick={abrirNuevo}
-                            className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-on-accent transition hover:bg-indigo-400"
-                        >
-                            <Plus className="size-4" />
-                            Nuevo cliente
-                        </button>
-                    </div>
-                </header>
+                <EncabezadoPagina
+                    kicker="Directorio"
+                    titulo="Clientes"
+                    descripcion="Administra los contactos de tu empresa."
+                    acciones={
+                        <>
+                            <p className="text-xs text-slate-500">
+                                {paginacion.total}{" "}
+                                {paginacion.total === 1 ? "cliente" : "clientes"}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={abrirNuevo}
+                                className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-500 px-3.5 text-[13px] font-semibold text-on-accent transition hover:bg-indigo-400"
+                            >
+                                <Plus className="size-4" />
+                                Nuevo cliente
+                            </button>
+                        </>
+                    }
+                />
 
-                <section className="py-8">
+                <section className="pt-5">
                     <form
                         onSubmit={buscar}
-                        className="mt-7 flex max-w-xl gap-2"
+                        className="mt-4 flex max-w-xl gap-2"
                         role="search"
                     >
                         <label className="relative block flex-1">

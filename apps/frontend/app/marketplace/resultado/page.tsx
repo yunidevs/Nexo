@@ -7,11 +7,18 @@ import { apiRequest } from "@/app/lib/api";
 
 type EstadoPedido =
     | "PENDIENTE_PAGO"
+    | "PAGO_RECHAZADO"
     | "PAGO_CONFIRMADO"
     | "PREPARANDO"
+    | "DESPACHADO"
     | "ENVIADO"
+    | "EN_TRANSITO"
+    | "EN_REPARTO"
     | "ENTREGADO"
     | "CANCELADO"
+    | "INCIDENCIA"
+    | "ENTREGA_FALLIDA"
+    | "DEVUELTO"
     | "REEMBOLSADO"
     | "REEMBOLSO_PENDIENTE";
 
@@ -21,15 +28,23 @@ interface PedidoPublico {
     total: string | number;
     tienda: string;
     creadaEn: string;
+    trackingUrl?: string;
 }
 
 const etiquetasEstado: Record<EstadoPedido, string> = {
     PENDIENTE_PAGO: "Pago pendiente de confirmación",
+    PAGO_RECHAZADO: "El pago fue rechazado",
     PAGO_CONFIRMADO: "Pago confirmado",
     PREPARANDO: "El vendedor está preparando tu pedido",
+    DESPACHADO: "El pedido fue despachado",
     ENVIADO: "El pedido fue enviado",
+    EN_TRANSITO: "El pedido está en tránsito",
+    EN_REPARTO: "El pedido está en reparto",
     ENTREGADO: "Pedido entregado",
     CANCELADO: "Pedido cancelado",
+    INCIDENCIA: "Hubo una incidencia con tu pedido",
+    ENTREGA_FALLIDA: "La entrega no pudo realizarse",
+    DEVUELTO: "Pedido devuelto al vendedor",
     REEMBOLSADO: "Pago reembolsado",
     REEMBOLSO_PENDIENTE: "Reembolso en proceso",
 };
@@ -138,7 +153,10 @@ export default function ResultadoMarketplacePage() {
                 ) : pedido &&
                   (pedido.estado === "PAGO_CONFIRMADO" ||
                       pedido.estado === "PREPARANDO" ||
+                      pedido.estado === "DESPACHADO" ||
                       pedido.estado === "ENVIADO" ||
+                      pedido.estado === "EN_TRANSITO" ||
+                      pedido.estado === "EN_REPARTO" ||
                       pedido.estado === "ENTREGADO") ? (
                     <CircleCheck className="mx-auto size-10 text-mp-success" />
                 ) : (
@@ -185,6 +203,22 @@ export default function ResultadoMarketplacePage() {
                     </>
                 ) : null}
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
+                    {pedido?.trackingUrl && (
+                        <Link
+                            href={pedido.trackingUrl}
+                            className="inline-flex h-10 items-center rounded-[10px] bg-indigo-500 px-4 text-[13px] font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-600"
+                        >
+                            Seguimiento del pedido
+                        </Link>
+                    )}
+                    {pedido && pedido.estado !== "PENDIENTE_PAGO" && (
+                        <Link
+                            href="/cuenta/registro"
+                            className="inline-flex h-10 items-center rounded-[10px] border border-mp-border px-4 text-[13px] font-semibold text-mp-text transition-colors hover:bg-mp-surface"
+                        >
+                            Crear cuenta de comprador
+                        </Link>
+                    )}
                     {pedidoId && (
                         <button
                             type="button"

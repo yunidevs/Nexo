@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 
 type RolUsuario = "ADMINISTRADOR" | "VENDEDOR" | "ALMACENERO";
 type FiltroEstado = "todos" | "true" | "false";
@@ -324,36 +325,29 @@ export default function PaginaUsuarios() {
     return (
         <>
             <div className="mx-auto w-full max-w-6xl">
-                <header className="flex flex-col justify-between gap-5 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-end">
-                    <div>
-                        <p className="text-sm font-medium text-indigo-300">
-                            Accesos de la empresa
-                        </p>
-                        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                            Usuarios y roles
-                        </h1>
-                        <p className="mt-2 text-sm text-slate-400">
-                            Administra las cuentas y los permisos de acceso
-                            de tu equipo.
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
-                        <p className="text-sm text-slate-500">
-                            {paginacion.total}{" "}
-                            {paginacion.total === 1 ? "usuario" : "usuarios"}
-                        </p>
-                        <button
-                            type="button"
-                            onClick={abrirNuevo}
-                            className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-on-accent transition hover:bg-indigo-400"
-                        >
-                            <Plus className="size-4" />
-                            Nuevo usuario
-                        </button>
-                    </div>
-                </header>
+                <EncabezadoPagina
+                    kicker="Accesos de la empresa"
+                    titulo="Usuarios y roles"
+                    descripcion="Administra las cuentas y los permisos de acceso de tu equipo."
+                    acciones={
+                        <>
+                            <p className="text-xs text-slate-500">
+                                {paginacion.total}{" "}
+                                {paginacion.total === 1 ? "usuario" : "usuarios"}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={abrirNuevo}
+                                className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-500 px-3.5 text-[13px] font-semibold text-on-accent transition hover:bg-indigo-400"
+                            >
+                                <Plus className="size-4" />
+                                Nuevo usuario
+                            </button>
+                        </>
+                    }
+                />
 
-                <section className="py-8">
+                <section className="pt-5">
                     <div className="mt-5 grid gap-3 text-xs text-slate-400 sm:grid-cols-3">
                         <p className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
                             <span className="font-semibold text-foreground">Administrador</span>

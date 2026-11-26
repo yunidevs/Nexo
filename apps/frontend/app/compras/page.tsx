@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 
 interface Proveedor {
     id: string;
@@ -348,35 +349,29 @@ export default function ComprasPage() {
 
     return (
             <div className="mx-auto w-full max-w-7xl">
-                <header className="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-300">
-                            Gestión
-                        </p>
-                        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                            Compras
-                        </h1>
-                        <p className="mt-2 text-sm text-slate-400">
-                            Registra pedidos a proveedores y recibe mercancía en inventario.
-                        </p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setError("");
-                            setMostrarFormulario((actual) => !actual);
-                        }}
-                        disabled={!proveedores.length || !productos.length}
-                        className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-on-accent transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        {mostrarFormulario ? (
-                            <X className="size-4" />
-                        ) : (
-                            <Plus className="size-4" />
-                        )}
-                        {mostrarFormulario ? "Cancelar" : "Crear compra"}
-                    </button>
-                </header>
+                <EncabezadoPagina
+                    kicker="Gestión"
+                    titulo="Compras"
+                    descripcion="Registra pedidos a proveedores y recibe mercancía en inventario."
+                    acciones={
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setError("");
+                                setMostrarFormulario((actual) => !actual);
+                            }}
+                            disabled={!proveedores.length || !productos.length}
+                            className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-500 px-3.5 text-[13px] font-semibold text-on-accent transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {mostrarFormulario ? (
+                                <X className="size-4" />
+                            ) : (
+                                <Plus className="size-4" />
+                            )}
+                            {mostrarFormulario ? "Cancelar" : "Crear compra"}
+                        </button>
+                    }
+                />
 
                 {error && (
                     <div

@@ -210,13 +210,30 @@ function ContenidoCatalogo() {
             return navegar({ ...consulta, q: undefined, pagina: undefined });
         }
         if (clave === "categoria")
-            return navegar({ ...consulta, categoria: undefined, pagina: undefined });
+            return navegar({
+                ...consulta,
+                categoria: undefined,
+                pagina: undefined,
+            });
         if (clave === "empresa")
-            return navegar({ ...consulta, empresa: undefined, pagina: undefined });
+            return navegar({
+                ...consulta,
+                empresa: undefined,
+                pagina: undefined,
+            });
         if (clave === "disponible")
-            return navegar({ ...consulta, disponible: undefined, pagina: undefined });
+            return navegar({
+                ...consulta,
+                disponible: undefined,
+                pagina: undefined,
+            });
         // "precio" o "precio:min" / "precio:max"
-        return navegar({ ...consulta, precioMin: undefined, precioMax: undefined, pagina: undefined });
+        return navegar({
+            ...consulta,
+            precioMin: undefined,
+            precioMax: undefined,
+            pagina: undefined,
+        });
     }
 
     function cambiarOrden(orden: string) {
@@ -251,20 +268,37 @@ function ContenidoCatalogo() {
     return (
         <main>
             <div className="border-b border-mp-border/80 bg-mp-surface/60">
-                <div className={`${contenedor} py-8 sm:py-10`}>
-                    <nav aria-label="Ruta de navegación" className="flex items-center gap-1.5">
-                        <Link href="/marketplace" className={miga}>
-                            Inicio
-                        </Link>
-                        <span aria-hidden="true" className="text-mp-text-faint">
-                            /
-                        </span>
-                        <span className="text-[11.5px] font-medium text-mp-primary">
-                            Productos
-                        </span>
+                <div className={`${contenedor} py-6 sm:py-2`}>
+                    <nav
+                        aria-label="Ruta de navegación"
+                        className="flex items-center justify-between gap-1.5 w-full"
+                    >
+                        <div className="flex items-center">
+                            <Link href="/marketplace" className={miga}>
+                                Inicio
+                            </Link>
+                            <span
+                                aria-hidden="true"
+                                className="text-mp-text-faint"
+                            >
+                                /
+                            </span>
+                            <span className="text-[11.5px] font-medium text-mp-primary">
+                                Productos
+                            </span>
+                        </div>
+
+                        <div className="mt-4 w-xl">
+                            <Buscador
+                                ref={buscadorRef}
+                                valorInicial={consulta.q ?? ""}
+                                onBuscar={buscar}
+                                cargando={cargando}
+                            />
+                        </div>
                     </nav>
 
-                    <div className="mt-5 flex flex-wrap items-end justify-between gap-5">
+                    <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
                         <div>
                             <p className={eyebrow}>
                                 <span
@@ -273,10 +307,10 @@ function ContenidoCatalogo() {
                                 />
                                 Catálogo
                             </p>
-                            <h1 className={`${tituloSeccion} mt-2`}>
+                            <h1 className={`${tituloSeccion} mt-1.5`}>
                                 Todos los productos
                             </h1>
-                            <p className="mt-2 text-[13px] text-mp-text-soft">
+                            <p className="mt-1.5 text-[13px] text-mp-text-soft">
                                 {cargando
                                     ? "Buscando productos..."
                                     : `${totalResultados} ${
@@ -291,7 +325,7 @@ function ContenidoCatalogo() {
                             <button
                                 type="button"
                                 onClick={() => setFiltrosAbiertos(true)}
-                                className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-mp-primary/25 bg-mp-elevated px-3.5 text-[12.5px] font-semibold text-mp-primary transition-all duration-300 hover:border-mp-primary/50 hover:bg-mp-primary/5 lg:hidden"
+                                className="inline-flex h-9 items-center gap-2 rounded-[10px] border border-mp-primary/25 bg-mp-elevated px-3.5 text-[12.5px] font-semibold text-mp-primary transition-all duration-300 hover:border-mp-primary/50 hover:bg-mp-primary/5 lg:hidden"
                             >
                                 <SlidersHorizontal
                                     className="size-4"
@@ -308,7 +342,7 @@ function ContenidoCatalogo() {
                                     onChange={(evento) =>
                                         cambiarOrden(evento.target.value)
                                     }
-                                    className="h-10 rounded-[10px] border border-mp-border bg-mp-elevated px-3 text-[12.5px] font-medium text-mp-text transition-colors focus:border-mp-primary/50 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mp-primary"
+                                    className="h-9 rounded-[10px] border border-mp-border bg-mp-elevated px-3 text-[12.5px] font-medium text-mp-text transition-colors focus:border-mp-primary/50 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mp-primary"
                                 >
                                     {ORDENES_CATALOGO.map((orden) => (
                                         <option
@@ -322,19 +356,12 @@ function ContenidoCatalogo() {
                             </label>
                         </div>
                     </div>
-
-                    <div className="mt-6 max-w-2xl">
-                        <Buscador
-                            ref={buscadorRef}
-                            valorInicial={consulta.q ?? ""}
-                            onBuscar={buscar}
-                            cargando={cargando}
-                        />
-                    </div>
                 </div>
             </div>
 
-            <div className={`${contenedor} grid items-start gap-8 py-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:py-10`}>
+            <div
+                className={`${contenedor} grid items-start gap-6 py-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:py-8`}
+            >
                 <aside
                     aria-label="Filtros del catálogo"
                     className="hidden lg:block"
@@ -398,9 +425,7 @@ function ContenidoCatalogo() {
                                         type="button"
                                         disabled={resultado.pagina <= 1}
                                         onClick={() =>
-                                            cambiarPagina(
-                                                resultado.pagina - 1,
-                                            )
+                                            cambiarPagina(resultado.pagina - 1)
                                         }
                                         className="inline-flex h-10 items-center rounded-[10px] border border-mp-border bg-mp-elevated px-4 text-[12.5px] font-semibold text-mp-primary transition-all duration-300 hover:border-mp-primary/45 hover:bg-mp-primary/5 disabled:cursor-not-allowed disabled:opacity-40"
                                     >
@@ -417,9 +442,7 @@ function ContenidoCatalogo() {
                                             resultado.totalPaginas
                                         }
                                         onClick={() =>
-                                            cambiarPagina(
-                                                resultado.pagina + 1,
-                                            )
+                                            cambiarPagina(resultado.pagina + 1)
                                         }
                                         className="inline-flex h-10 items-center rounded-[10px] border border-mp-border bg-mp-elevated px-4 text-[12.5px] font-semibold text-mp-primary transition-all duration-300 hover:border-mp-primary/45 hover:bg-mp-primary/5 disabled:cursor-not-allowed disabled:opacity-40"
                                     >

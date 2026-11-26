@@ -114,6 +114,27 @@ export function Navegacion() {
                                 {enlace.etiqueta}
                             </Link>
                         ))}
+                        <Link
+                            href="/marketplace/productos"
+                            onClick={cerrar}
+                            className="border-b border-[#25382A]/8 py-3.5 font-serif text-[1.35rem] text-[#25382A]"
+                        >
+                            Productos
+                        </Link>
+                        <Link
+                            href="/seguimiento-pedido"
+                            onClick={cerrar}
+                            className="border-b border-[#25382A]/8 py-3.5 font-serif text-[1.35rem] text-[#25382A]"
+                        >
+                            Seguimiento de pedido
+                        </Link>
+                        <Link
+                            href="/cuenta"
+                            onClick={cerrar}
+                            className="py-3.5 font-serif text-[1.35rem] text-[#25382A]"
+                        >
+                            Mi cuenta
+                        </Link>
                     </nav>
                     <div className="mt-5 flex flex-col gap-2.5">
                         <Link

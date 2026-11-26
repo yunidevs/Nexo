@@ -35,8 +35,8 @@ export function PanelCarrito({ abierto, onCerrar }: PanelCarritoProps) {
                 className="absolute inset-0 h-full w-full cursor-default bg-mp-primary/40 backdrop-blur-[2px]"
             />
             <aside className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-mp-surface shadow-[0_0_60px_-20px_rgba(37,56,42,0.55)]">
-                <header className="flex items-center justify-between border-b border-mp-border px-5 py-4">
-                    <h2 className="font-serif text-[1.45rem] leading-none tracking-[-0.01em] text-mp-primary">
+                <header className="flex items-center justify-between border-b border-mp-border px-5 py-3">
+                    <h2 className="font-serif text-[1.25rem] leading-none tracking-[-0.01em] text-mp-primary">
                         Tu carrito
                         <span className="ml-2 align-middle text-[12.5px] font-normal text-mp-text-soft">
                             {cantidadArticulos}{" "}
@@ -55,7 +55,7 @@ export function PanelCarrito({ abierto, onCerrar }: PanelCarritoProps) {
                     </button>
                 </header>
 
-                <div className="flex-1 overflow-y-auto px-5 py-5">
+                <div className="flex-1 overflow-y-auto px-5 py-4">
                     {grupos.length === 0 ? (
                         <div className="grid place-items-center py-16 text-center">
                             <span className="grid size-14 place-items-center rounded-full bg-mp-chip">

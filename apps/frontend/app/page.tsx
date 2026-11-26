@@ -3,8 +3,11 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { DashboardPreview } from "@/app/components/dashboard-preview";
+import { HeroMovil } from "@/app/components/landing/hero-movil";
 import { Navegacion } from "@/app/components/landing/navegacion";
+import { NavMovil } from "@/app/components/landing/nav-movil";
 import { ProductosMarketplace } from "@/app/components/landing/productos-marketplace";
+import { SeccionesMoviles } from "@/app/components/landing/secciones-movil";
 
 export const metadata: Metadata = {
     title: {
@@ -36,7 +39,7 @@ export default function Home() {
     return (
         <main
             id="inicio"
-            className="landing-page relative flex min-h-[100svh] flex-col overflow-x-clip bg-[#F4F1E8] text-[#252723] selection:bg-[#D9E8A5] selection:text-[#25382A]"
+            className="landing-page relative flex min-h-[100svh] flex-col overflow-x-clip bg-[#F4F1E8] pb-20 text-[#252723] selection:bg-[#D9E8A5] selection:text-[#25382A] lg:pb-0"
         >
             {/* Materia orgánica: un único lavado de lima, muy difuso. */}
             <div
@@ -47,7 +50,9 @@ export default function Home() {
             <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col px-5 sm:px-8 lg:px-10">
                 <Navegacion />
 
-                <section className="landing-bloque grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] items-center gap-8 lg:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] lg:gap-10 xl:gap-14">
+                <HeroMovil />
+
+                <section className="landing-bloque mt-8 grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] items-center gap-8 lg:mt-0 lg:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] lg:gap-10 xl:gap-14">
                     {/* Columna de mensaje comercial */}
                     <div className="flex min-w-0 flex-col justify-center">
                         <p className="landing-entrada landing-entrada-1 flex items-center gap-3 text-[10px] font-medium tracking-[0.2em] text-[#697A52] uppercase">
@@ -111,8 +116,8 @@ export default function Home() {
                         </ul>
                     </div>
 
-                    {/* Mockup del ERP */}
-                    <div className="landing-entrada landing-entrada-3 h-full max-h-[600px] min-h-[300px] min-w-0 sm:min-h-[380px] lg:min-h-0">
+                    {/* Mockup del ERP: en móvil cede el espacio al hero comercial */}
+                    <div className="landing-entrada landing-entrada-3 hidden h-full max-h-[600px] min-h-[300px] min-w-0 sm:min-h-[380px] lg:block lg:min-h-0">
                         <DashboardPreview />
                     </div>
                 </section>
@@ -157,7 +162,11 @@ export default function Home() {
                         <ProductosMarketplace />
                     </div>
                 </section>
+
+                <SeccionesMoviles />
             </div>
+
+            <NavMovil />
         </main>
     );
 }

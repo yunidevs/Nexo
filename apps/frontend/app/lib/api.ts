@@ -30,6 +30,8 @@ export async function apiRequest<T extends object>(
         response = await fetch(`${apiBase}${path}`, {
             method,
             credentials: "include",
+            // Evita que el navegador responda 304 sin cuerpo desde su caché.
+            cache: "no-store",
             headers: data
                 ? { "content-type": "application/json", ...headers }
                 : headers,

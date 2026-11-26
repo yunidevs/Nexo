@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { usePerfilWorkspace } from "@/app/components/workspace-shell";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 
 type TipoReporte =
     | "ventas"
@@ -715,37 +716,31 @@ export default function ReportesPage() {
     const IconoReporte = reporteActual.icono;
 
     return (
-        <main className="mx-auto w-full max-w-[1440px] p-5 sm:p-7">
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-                <div>
-                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-indigo-300">
-                        Análisis del negocio
-                    </p>
-                    <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-                        Reportes
-                    </h1>
-                    <p className="mt-1 text-sm text-slate-400">
-                        Consulta la actividad y los datos de tu empresa.
-                    </p>
-                </div>
-                <button
-                    type="button"
-                    onClick={() =>
-                        descargarCsv(
-                            reporteActual.nombre,
-                            reporteActual.columnas,
-                            filasFiltradas,
-                        )
-                    }
-                    disabled={cargando || Boolean(error) || filasFiltradas.length === 0}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                    <Download className="size-4" />
-                    Exportar CSV
-                </button>
-            </div>
+        <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-6">
+            <EncabezadoPagina
+                kicker="Análisis del negocio"
+                titulo="Reportes"
+                descripcion="Consulta la actividad y los datos de tu empresa."
+                acciones={
+                    <button
+                        type="button"
+                        onClick={() =>
+                            descargarCsv(
+                                reporteActual.nombre,
+                                reporteActual.columnas,
+                                filasFiltradas,
+                            )
+                        }
+                        disabled={cargando || Boolean(error) || filasFiltradas.length === 0}
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 text-[13px] font-medium text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                        <Download className="size-4" />
+                        Exportar CSV
+                    </button>
+                }
+            />
 
-            <div className="mt-7 flex gap-2 overflow-x-auto pb-2">
+            <div className="mt-5 flex gap-2 overflow-x-auto pb-2">
                 {reportesVisibles.map((reporte) => {
                     const Icono = reporte.icono;
                     const seleccionado = reporte.id === tipo;

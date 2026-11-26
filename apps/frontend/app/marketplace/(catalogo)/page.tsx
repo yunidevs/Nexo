@@ -296,7 +296,7 @@ export default function PaginaInicioMarketplace() {
                         key="categorias"
                         aria-labelledby="titulo-categorias"
                         data-mp-reveal
-                        className="py-12 sm:py-14"
+                        className="py-10 sm:py-12"
                     >
                         <div className="flex flex-wrap items-end justify-between gap-4">
                             <div>
@@ -379,7 +379,7 @@ export default function PaginaInicioMarketplace() {
                     key="productos"
                     aria-labelledby="titulo-productos"
                     data-mp-reveal
-                    className="border-t border-mp-border/80 py-12 sm:py-14"
+                    className="border-t border-mp-border/80 py-10 sm:py-12"
                 >
                     <div className="flex flex-wrap items-end justify-between gap-4">
                         <div>
@@ -449,7 +449,7 @@ export default function PaginaInicioMarketplace() {
                         key="novedades"
                         aria-labelledby="titulo-novedades"
                         data-mp-reveal
-                        className="border-t border-mp-border/80 py-12 sm:py-14"
+                        className="border-t border-mp-border/80 py-10 sm:py-12"
                     >
                         <div className="flex flex-wrap items-end justify-between gap-4">
                             <div>
@@ -497,7 +497,7 @@ export default function PaginaInicioMarketplace() {
                         key="tiendas"
                         aria-labelledby="titulo-tiendas"
                         data-mp-reveal
-                        className="border-t border-mp-border/80 py-12 sm:py-14"
+                        className="border-t border-mp-border/80 py-10 sm:py-12"
                     >
                         <div className="flex flex-wrap items-end justify-between gap-4">
                             <div>
@@ -546,7 +546,7 @@ export default function PaginaInicioMarketplace() {
                     key="beneficios"
                     aria-labelledby="titulo-beneficios"
                     data-mp-reveal
-                    className="border-t border-mp-border/80 py-12 sm:py-14"
+                    className="border-t border-mp-border/80 py-10 sm:py-12"
                 >
                     <h2 id="titulo-beneficios" className="sr-only">
                         Beneficios del marketplace

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 
 type MetodoPago =
     | "EFECTIVO"
@@ -453,35 +454,29 @@ export default function VentasPage() {
 
     return (
         <div className="mx-auto w-full max-w-7xl">
-            <header className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-300">
-                        Gestión
-                    </p>
-                    <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                        Ventas
-                    </h1>
-                    <p className="mt-2 text-sm text-slate-400">
-                        Registra ventas, pagos y actualiza las existencias automáticamente.
-                    </p>
-                </div>
-                <button
-                    type="button"
-                    onClick={() => {
-                        setError("");
-                        setMostrarFormulario((actual) => !actual);
-                    }}
-                    disabled={!clientes.length || !productos.length}
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-on-accent transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    {mostrarFormulario ? (
-                        <X className="size-4" />
-                    ) : (
-                        <Plus className="size-4" />
-                    )}
-                    {mostrarFormulario ? "Cancelar" : "Crear venta"}
-                </button>
-            </header>
+            <EncabezadoPagina
+                kicker="Gestión"
+                titulo="Ventas"
+                descripcion="Registra ventas, pagos y actualiza las existencias automáticamente."
+                acciones={
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setError("");
+                            setMostrarFormulario((actual) => !actual);
+                        }}
+                        disabled={!clientes.length || !productos.length}
+                        className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-500 px-3.5 text-[13px] font-semibold text-on-accent transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {mostrarFormulario ? (
+                            <X className="size-4" />
+                        ) : (
+                            <Plus className="size-4" />
+                        )}
+                        {mostrarFormulario ? "Cancelar" : "Crear venta"}
+                    </button>
+                }
+            />
 
             {error && (
                 <div

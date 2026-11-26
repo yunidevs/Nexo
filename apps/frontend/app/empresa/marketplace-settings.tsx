@@ -149,14 +149,20 @@ export function MarketplaceSettings({
                 slug: slug.trim().toLowerCase(),
                 costoEnvio: Number(costoEnvio),
             });
-            if (!esConfiguracionMarketplace(resultado)) {
+            if (
+                typeof resultado !== "object" ||
+                resultado === null ||
+                !("configuracion" in resultado) ||
+                !esConfiguracionMarketplace(resultado.configuracion)
+            ) {
                 throw new Error(
                     "La API devolvió una configuración de tienda no válida.",
                 );
             }
-            setConfiguracion(resultado);
-            setSlug(resultado.tiendaSlug ?? "");
-            setTiendaActiva(resultado.tiendaActiva);
+            const guardada = resultado.configuracion;
+            setConfiguracion(guardada);
+            setSlug(guardada.tiendaSlug ?? "");
+            setTiendaActiva(guardada.tiendaActiva);
             setMensaje("La configuración de la tienda se guardó.");
             // El estado de conexión puede haber cambiado con el guardado.
             await recargar();

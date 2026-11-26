@@ -211,7 +211,7 @@ export default function PaginaProductoMarketplace({
             </div>
 
             <div
-                className={`${contenedor} grid gap-10 py-8 sm:py-10 lg:grid-cols-2 lg:gap-14`}
+                className={`${contenedor} grid gap-8 py-6 sm:py-8 lg:grid-cols-2 lg:gap-12`}
             >
                 <div className="relative aspect-square overflow-hidden rounded-[26px] border border-mp-border bg-mp-warm">
                     <ImagenProducto
@@ -387,7 +387,7 @@ export default function PaginaProductoMarketplace({
             {relacionados.length > 0 ? (
                 <section
                     aria-labelledby="titulo-relacionados"
-                    className="border-t border-mp-border/80 bg-mp-surface/60 py-12 sm:py-14"
+                    className="border-t border-mp-border/80 bg-mp-surface/60 py-10 sm:py-12"
                 >
                     <div className={contenedor}>
                         <p className={eyebrow}>

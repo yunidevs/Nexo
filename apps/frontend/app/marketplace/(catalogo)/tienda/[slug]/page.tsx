@@ -89,7 +89,7 @@ export default function PaginaTiendaMarketplace({
     return (
         <main>
             <div className="border-b border-mp-border/80 bg-mp-surface/60">
-                <div className={`${contenedor} py-8 sm:py-10`}>
+                <div className={`${contenedor} py-6 sm:py-8`}>
                     <nav
                         aria-label="Ruta de navegación"
                         className="flex items-center gap-1.5"
@@ -117,7 +117,7 @@ export default function PaginaTiendaMarketplace({
                             className="mt-5 h-20 animate-pulse rounded-[16px] bg-mp-warm"
                         />
                     ) : tienda ? (
-                        <div className="mt-5 flex flex-wrap items-center gap-5">
+                        <div className="mt-4 flex flex-wrap items-center gap-4">
                             <span
                                 aria-hidden="true"
                                 className="grid size-14 shrink-0 place-items-center rounded-full bg-mp-chip text-mp-primary"
@@ -168,7 +168,7 @@ export default function PaginaTiendaMarketplace({
                 </div>
             </div>
 
-            <div className={`${contenedor} py-10 sm:py-12`}>
+            <div className={`${contenedor} py-8 sm:py-10`}>
                 {error ? (
                     <p
                         role="alert"

@@ -177,7 +177,7 @@ const WorkspaceNavigation = memo(function WorkspaceNavigation({
 }) {
     return (
         <nav
-            className="flex-1 space-y-5 overflow-y-auto px-3 py-5"
+            className="flex-1 space-y-4 overflow-y-auto px-3 py-4"
             aria-label="Navegación principal"
         >
             {grupos
@@ -251,7 +251,7 @@ const WorkspaceNavigation = memo(function WorkspaceNavigation({
                                                                 ? "page"
                                                                 : undefined
                                                         }
-                                                        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition ${
+                                                        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
                                                             activo
                                                                 ? "bg-indigo-500/15 text-indigo-200 ring-1 ring-inset ring-indigo-400/15"
                                                                 : "text-slate-400 hover:bg-white/[0.045] hover:text-slate-100"
@@ -493,7 +493,7 @@ export function WorkspaceShell({
                     menuMovilAbierto ? "translate-x-0" : "-translate-x-full"
                 } ${contraido ? "lg:w-20" : "lg:w-68"}`}
             >
-                <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-white/[0.07] px-5">
+                <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.07] px-5">
                     <Link
                         href="/dashboard"
                         className={`flex min-w-0 items-center gap-2.5 ${
@@ -592,7 +592,7 @@ export function WorkspaceShell({
                 className="flex min-h-screen min-w-0 flex-1 flex-col"
                 inert={menuMovilAbierto}
             >
-                <header className="sticky top-0 z-20 flex h-[68px] shrink-0 items-center justify-between border-b border-white/[0.07] bg-background/95 px-5 backdrop-blur sm:px-7">
+                <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-white/[0.07] bg-background/95 px-5 backdrop-blur sm:px-7">
                     <div className="flex min-w-0 items-center gap-3">
                         <button
                             type="button"
@@ -713,11 +713,11 @@ export function WorkspaceShell({
                     </div>
                 </header>
 
-                <main className="w-full flex-1 px-5 py-7 sm:px-7 lg:px-9">
+                <main className="w-full flex-1 px-5 py-5 sm:px-7 lg:px-8 lg:py-6">
                     {(errorPerfil || errorCerrarSesion) && (
                         <div
                             role="alert"
-                            className="mx-auto mb-6 flex w-full max-w-7xl items-start gap-2 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] px-4 py-3 text-sm text-rose-200"
+                            className="mx-auto mb-4 flex w-full max-w-7xl items-start gap-2 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] px-4 py-3 text-sm text-rose-200"
                         >
                             <span>{errorPerfil || errorCerrarSesion}</span>
                         </div>

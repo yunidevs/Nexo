@@ -322,7 +322,7 @@ export function VistaCatalogo({
     return (
         <>
             <section className="border-b border-mp-border/80 bg-mp-surface/60">
-                <div className={`${contenedor} py-8 sm:py-10`}>
+                <div className={`${contenedor} py-6 sm:py-8`}>
                     <p className={eyebrow}>
                         <span
                             aria-hidden="true"
@@ -330,13 +330,13 @@ export function VistaCatalogo({
                         />
                         Catálogo
                     </p>
-                    <h1 className={`${tituloSeccion} mt-2`}>{titulo}</h1>
+                    <h1 className={`${tituloSeccion} mt-1.5`}>{titulo}</h1>
                     {descripcion ? (
-                        <p className="mt-2 max-w-[58ch] text-[13px] leading-6 text-mp-text-soft">
+                        <p className="mt-1.5 max-w-[58ch] text-[13px] leading-6 text-mp-text-soft">
                             {descripcion}
                         </p>
                     ) : null}
-                    <div className="mt-6 max-w-2xl">
+                    <div className="mt-4 max-w-2xl">
                         <Buscador
                             ref={buscadorRef}
                             valorInicial={qParam}
@@ -348,7 +348,7 @@ export function VistaCatalogo({
             </section>
 
             <div
-                className={`${contenedor} grid items-start gap-8 py-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:py-10`}
+                className={`${contenedor} grid items-start gap-6 py-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:py-8`}
             >
                 <aside
                     className="hidden lg:block"
@@ -524,8 +524,8 @@ export function VistaCatalogo({
                         className="absolute inset-0 h-full w-full cursor-default bg-mp-primary/40 backdrop-blur-[2px]"
                     />
                     <div className="absolute inset-y-0 left-0 flex w-full max-w-xs flex-col bg-mp-surface shadow-[0_0_60px_-20px_rgba(37,56,42,0.55)]">
-                        <header className="flex items-center justify-between border-b border-mp-border px-5 py-4">
-                            <h2 className="font-serif text-[1.35rem] leading-none text-mp-primary">
+                        <header className="flex items-center justify-between border-b border-mp-border px-5 py-3">
+                            <h2 className="font-serif text-[1.2rem] leading-none text-mp-primary">
                                 Filtros
                             </h2>
                             <button
@@ -537,10 +537,10 @@ export function VistaCatalogo({
                                 <X className="size-5" aria-hidden="true" />
                             </button>
                         </header>
-                        <div className="flex-1 overflow-y-auto px-5 py-5">
+                        <div className="flex-1 overflow-y-auto px-5 py-4">
                             {panelFiltros}
                         </div>
-                        <div className="border-t border-mp-border px-5 py-4">
+                        <div className="border-t border-mp-border px-5 py-3">
                             <button
                                 type="button"
                                 onClick={() => setFiltrosAbiertos(false)}

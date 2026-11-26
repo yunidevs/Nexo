@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 
 interface Proveedor {
     id: string;
@@ -550,30 +551,23 @@ export default function PaginaProveedores() {
     return (
         <>
             <div className="mx-auto w-full max-w-6xl">
-                <header className="flex flex-wrap items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
-                    <div>
-                        <p className="text-sm font-medium text-indigo-300">
-                            Compras y abastecimiento
-                        </p>
-                        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                            Proveedores
-                        </h1>
-                        <p className="mt-2 text-sm text-slate-400">
-                            Administra tus proveedores y consulta el historial
-                            de cada operación.
-                        </p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={abrirNuevo}
-                        className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-on-accent transition hover:bg-indigo-400"
-                    >
-                        <Plus className="size-4" />
-                        Nuevo proveedor
-                    </button>
-                </header>
+                <EncabezadoPagina
+                    kicker="Compras y abastecimiento"
+                    titulo="Proveedores"
+                    descripcion="Administra tus proveedores y consulta el historial de cada operación."
+                    acciones={
+                        <button
+                            type="button"
+                            onClick={abrirNuevo}
+                            className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-500 px-3.5 text-[13px] font-semibold text-on-accent transition hover:bg-indigo-400"
+                        >
+                            <Plus className="size-4" />
+                            Nuevo proveedor
+                        </button>
+                    }
+                />
 
-                <section className="py-7">
+                <section className="pt-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="text-sm text-slate-500">
                             {paginacion.total}{" "}

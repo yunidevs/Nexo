@@ -105,7 +105,7 @@ export function Buscador({
                     className={
                         compacto
                             ? "h-10 w-full rounded-full border-0 bg-transparent pl-10 pr-9 text-[13px] text-mp-text outline-none placeholder:text-mp-text-faint"
-                            : "h-12 w-full rounded-full border-0 bg-transparent pl-11 pr-10 text-[14px] text-mp-text outline-none placeholder:text-mp-text-faint"
+                            : "h-11 w-full rounded-full border-0 bg-transparent pl-11 pr-10 text-[14px] text-mp-text outline-none placeholder:text-mp-text-faint"
                     }
                 />
                 {valor && !cargando ? (

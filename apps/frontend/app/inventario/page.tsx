@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 
 type TipoMovimiento = "ENTRADA" | "SALIDA" | "AJUSTE" | "DEVOLUCION";
 type Pestaña = "productos" | "movimientos" | "alertas";
@@ -199,34 +200,28 @@ export default function InventarioPage() {
     }
 
     return (
-            <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
-                <header className="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-300">
-                            Gestión
-                        </p>
-                        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                            Inventario
-                        </h1>
-                        <p className="mt-2 text-sm text-slate-400">
-                            Controla existencias, movimientos y alertas de stock bajo.
-                        </p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setError("");
-                            setMostrarFormulario(true);
-                        }}
-                        disabled={productos.length === 0}
-                        className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-on-accent transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        <Plus className="size-4" />
-                        Registrar movimiento
-                    </button>
-                </header>
+            <main className="mx-auto w-full max-w-7xl px-5 py-6 sm:px-8">
+                <EncabezadoPagina
+                    kicker="Gestión"
+                    titulo="Inventario"
+                    descripcion="Controla existencias, movimientos y alertas de stock bajo."
+                    acciones={
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setError("");
+                                setMostrarFormulario(true);
+                            }}
+                            disabled={productos.length === 0}
+                            className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-500 px-3.5 text-[13px] font-semibold text-on-accent transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <Plus className="size-4" />
+                            Registrar movimiento
+                        </button>
+                    }
+                />
 
-                <section className="mt-7 grid gap-3 sm:grid-cols-3">
+                <section className="mt-4 grid gap-3 sm:grid-cols-3">
                     <Resumen icono={Package} etiqueta="Productos" valor={totalProductos} />
                     <Resumen
                         icono={AlertTriangle}

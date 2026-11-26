@@ -14,6 +14,7 @@ import { Buscador } from "@/app/components/marketplace/buscador";
 import { PanelCarrito } from "@/app/components/marketplace/panel-carrito";
 import { useCarrito } from "@/app/components/marketplace/carrito";
 import { MarcaNexo } from "@/app/components/landing/marca";
+import { EnlaceCuenta } from "@/app/components/marketplace/enlace-cuenta";
 import { construirConsultaCatalogo } from "@/app/lib/marketplace";
 
 const enlaces = [
@@ -54,7 +55,7 @@ export function EncabezadoMarketplace() {
     return (
         <>
             <header className="sticky top-0 z-40 border-b border-mp-border/70 bg-mp-surface/85 backdrop-blur-md">
-                <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-3 px-4 sm:gap-5 sm:px-6 lg:h-[68px] lg:px-8">
+                <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-3 px-4 sm:gap-5 sm:px-6 lg:px-8">
                     <Link
                         href="/marketplace"
                         className="group flex shrink-0 items-center gap-2.5"
@@ -123,6 +124,8 @@ export function EncabezadoMarketplace() {
                             />
                         </Link>
 
+                        <EnlaceCuenta />
+
                         <button
                             type="button"
                             onClick={() => setCarritoAbierto(true)}
@@ -157,7 +160,7 @@ export function EncabezadoMarketplace() {
 
                 {/* Buscador en tablet y móvil (el escritorio lo lleva en la
                     barra principal). */}
-                <div className="mx-auto max-w-[1400px] px-4 pb-3 sm:px-6 xl:hidden lg:px-8">
+                <div className="mx-auto max-w-[1400px] px-4 pb-2.5 sm:px-6 lg:px-8">
                     <Buscador compacto onBuscar={buscar} />
                 </div>
 
@@ -177,7 +180,7 @@ export function EncabezadoMarketplace() {
                                             aria-current={
                                                 activo ? "page" : undefined
                                             }
-                                            className={`flex items-center justify-between rounded-[10px] px-3 py-2.5 text-[14px] transition-colors duration-300 ${
+                                            className={`flex items-center justify-between rounded-[10px] px-3 py-2 text-[14px] transition-colors duration-300 ${
                                                 activo
                                                     ? "bg-mp-chip font-semibold text-mp-primary"
                                                     : "font-medium text-mp-text-soft hover:bg-mp-primary/10 hover:text-mp-primary"
@@ -205,6 +208,13 @@ export function EncabezadoMarketplace() {
                                 className="inline-flex items-center rounded-[10px] px-4 py-2.5 text-[13px] font-medium text-mp-text-soft transition-colors duration-300 hover:text-mp-primary"
                             >
                                 Acceso para empresas
+                            </Link>
+                            <Link
+                                href="/cuenta/ingresar"
+                                onClick={cerrarMenu}
+                                className="inline-flex items-center rounded-[10px] px-4 py-2.5 text-[13px] font-medium text-mp-text-soft transition-colors duration-300 hover:text-mp-primary"
+                            >
+                                Ingresar o crear cuenta de comprador
                             </Link>
                         </div>
                     </nav>

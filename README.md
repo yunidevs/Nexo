@@ -2,8 +2,9 @@
 
 Plataforma de gestión empresarial en desarrollo. El MVP actual ofrece registro
 de empresas, configuración de información comercial, gestión de usuarios y
-clientes con datos aislados por empresa. Usa Next.js, Express, TypeScript,
-PostgreSQL y Prisma.
+clientes con datos aislados por empresa, identificación automática de compradores
+del marketplace, seguimiento público de pedidos y un dashboard analítico por
+período. Usa Next.js, Express, TypeScript, PostgreSQL y Prisma.
 
 ## Requisitos
 
@@ -49,12 +50,20 @@ completa el formulario.
 - Configuración del nombre y sitio web de la empresa; administración de los
   miembros y sus roles dentro de cada organización.
 - Clientes: crear, consultar, buscar, paginar, editar y activar/desactivar.
+  Los compradores del marketplace se resuelven automáticamente por correo o
+  teléfono normalizado y quedan vinculados a su pedido; los duplicados
+  históricos se señalan, nunca se fusionan solos.
 - Compras: asociar un proveedor, agregar productos, registrar el total y recibir
   mercancía con actualización transaccional del inventario.
 - Ventas: asociar clientes, calcular subtotal, descuento e impuesto global,
   registrar pagos parciales y descontar las existencias.
 - Marketplace público opcional por empresa: publicación de productos,
   checkout de invitado con entrega local y gestión de pedidos.
+- Seguimiento de pedidos: historial de estados con transiciones validadas,
+  observaciones, responsable y enlace público firmado con caducidad.
+- Dashboard analítico: actividad diaria, semanal y mensual con comparación
+  contra el período anterior, series por hora o por día y snapshot de pedidos
+  del marketplace. Las métricas se agregan en el backend.
 - Pagos de marketplace centralizados con PayPal Orders API (servidor a
   servidor) y checkout alojado por PayPal; las liquidaciones a vendedores son
   manuales. La comisión de plataforma predeterminada es 2 % del total pagado,
@@ -102,6 +111,32 @@ requiere PayPal Multiparty Payments (Marketplace/Commerce Platform), que exige
 dar de alta a cada vendedor como receptor, permisos OAuth por vendedor y la
 aprobación de PayPal. Este proyecto no simula esas transferencias: registra la
 comisión de la plataforma y deja la liquidación al vendedor como proceso manual.
+
+## Dashboard analítico y seguimiento
+
+El endpoint `GET /api/dashboard/estadisticas` acepta `periodo=dia|semana|mes` y
+una `fecha=AAAA-MM-DD` opcional. Requiere sesión y siempre usa la empresa del
+token, igual que el resto de la API. Devuelve cubos con relleno de ceros,
+totales y comparación contra el período anterior; `variacion` es `null` cuando
+no existe una base de cálculo, para no mostrar porcentajes inventados.
+
+Los cortes son locales, no UTC. `DASHBOARD_TIMEZONE` define la zona IANA
+(por defecto `America/Montevideo`) y se valida al iniciar el servidor. El
+resumen clásico del dashboard (`hoy` y `mes`) usa la misma zona.
+
+El seguimiento público se consulta en
+`GET /api/marketplace/pedidos/:id/seguimiento?t=<token>`. El token es un HMAC
+con caducidad de 30 días derivado de `JWT_ACCESS_SECRET` y se verifica en
+tiempo constante; no otorga acceso a otros pedidos ni a la gestión interna.
+Los vendedores autenticados consultan el historial completo en
+`GET /api/marketplace/gestion/pedidos/:id/historial`.
+
+## Documentación
+
+- [Arquitectura y convenciones](docs/arquitectura.md)
+- [Identidad y actividad de clientes](docs/clientes.md)
+- [Estados y seguimiento de pedidos](docs/seguimiento-pedidos.md)
+- [Métricas del dashboard](docs/dashboard.md)
 
 ## Verificación
 

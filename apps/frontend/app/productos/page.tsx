@@ -16,6 +16,7 @@ import {
 import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 import { usePerfilWorkspace } from "@/app/components/workspace-shell";
 import { esUrlImagenValida } from "@/app/components/marketplace/imagen-producto";
 
@@ -727,34 +728,28 @@ export default function PaginaProductos() {
     return (
         <>
             <div className="mx-auto w-full max-w-6xl">
-                <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
-                    <div>
-                        <p className="text-sm font-medium text-indigo-300">Inventario</p>
-                        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                            Productos
-                        </h1>
-                        <p className="mt-2 text-sm text-slate-400">
-                            Administra precios, costos y niveles mínimos de stock.
-                        </p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={abrirNuevo}
-                        className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-on-accent transition hover:bg-indigo-400"
-                    >
-                        <Plus className="size-4" />
-                        Nuevo producto
-                    </button>
-                </header>
+                <EncabezadoPagina
+                    kicker="Inventario"
+                    titulo="Productos"
+                    descripcion="Administra precios, costos y niveles mínimos de stock."
+                    acciones={
+                        <button
+                            type="button"
+                            onClick={abrirNuevo}
+                            className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-500 px-3.5 text-[13px] font-semibold text-on-accent transition hover:bg-indigo-400"
+                        >
+                            <Plus className="size-4" />
+                            Nuevo producto
+                        </button>
+                    }
+                />
 
-                <section className="py-8">
-                    <div className="flex flex-wrap items-end justify-between gap-4">
-                        <div>
-                            <p className="text-sm text-slate-400">
-                                Busca por nombre, SKU o categoría.
-                            </p>
-                        </div>
-                        <p className="text-sm text-slate-500">
+                <section className="pt-5">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                        <p className="text-xs text-slate-500">
+                            Busca por nombre, SKU o categoría.
+                        </p>
+                        <p className="text-xs text-slate-500">
                             {paginacion.total}{" "}
                             {paginacion.total === 1 ? "producto" : "productos"}
                         </p>

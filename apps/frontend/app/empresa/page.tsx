@@ -4,6 +4,7 @@ import { Building2, ExternalLink, LoaderCircle, Users } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 import { MarketplaceSettings } from "./marketplace-settings";
 import { AparienciaSettings } from "./apariencia-settings";
 
@@ -149,20 +150,15 @@ export default function PaginaEmpresa() {
 
     return (
             <div className="mx-auto w-full max-w-5xl">
-                <section className="py-10">
-                    <p className="text-sm font-medium text-indigo-300">
-                        Perfil de organización
-                    </p>
-                    <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                        Configuración de la empresa
-                    </h1>
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                        Mantén actualizados el nombre y la información comercial
-                        de tu organización.
-                    </p>
+                <section className="pt-2">
+                    <EncabezadoPagina
+                        kicker="Perfil de organización"
+                        titulo="Configuración de la empresa"
+                        descripcion="Mantén actualizados el nombre y la información comercial de tu organización."
+                    />
 
                     {cargando ? (
-                        <p className="mt-10 inline-flex items-center gap-2 text-sm text-slate-400">
+                        <p className="mt-6 inline-flex items-center gap-2 text-sm text-slate-400">
                             <LoaderCircle className="size-4 animate-spin" />
                             Cargando la empresa...
                         </p>
@@ -175,7 +171,7 @@ export default function PaginaEmpresa() {
                         </p>
                     ) : empresa ? (
                         <>
-                        <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+                        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
                             <form
                                 onSubmit={(evento) => void guardar(evento)}
                                 className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 sm:p-8"

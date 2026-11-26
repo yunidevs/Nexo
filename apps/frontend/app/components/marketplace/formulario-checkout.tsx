@@ -4,6 +4,7 @@ import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCarrito, type LineaCarrito } from "@/app/components/marketplace/carrito";
 import { apiRequest } from "@/app/lib/api";
+import { obtenerCuenta } from "@/app/lib/cuenta";
 import {
     esTiendaMarketplace,
     formatearImporte,
@@ -54,6 +55,28 @@ export function FormularioCheckout({
     const [pagando, setPagando] = useState(false);
     const [error, setError] = useState("");
     const claveIdempotencia = useRef<string | null>(null);
+    const [correoCuenta, setCorreoCuenta] = useState("");
+
+    useEffect(() => {
+        let cancelada = false;
+        void obtenerCuenta().then((cuenta) => {
+            if (cancelada || !cuenta) return;
+            setCorreoCuenta(cuenta.correo);
+            setComprador((actual) => ({
+                ...actual,
+                nombre:
+                    actual.nombre ||
+                    [cuenta.nombre, cuenta.apellido]
+                        .filter(Boolean)
+                        .join(" "),
+                correo: actual.correo || cuenta.correo,
+                telefono: actual.telefono || cuenta.telefono || "",
+            }));
+        });
+        return () => {
+            cancelada = true;
+        };
+    }, []);
 
     useEffect(() => {
         let cancelada = false;
@@ -198,6 +221,13 @@ export function FormularioCheckout({
             {errorTienda ? (
                 <p role="alert" className="mt-2 text-xs text-mp-error">
                     {errorTienda} Los totales se confirman al continuar.
+                </p>
+            ) : null}
+
+            {correoCuenta ? (
+                <p className="mt-3 rounded-[9px] bg-mp-primary/10 px-3 py-2 text-[11px] text-mp-primary">
+                    Comprando con tu cuenta de comprador ({correoCuenta}).
+                    El pedido quedará asociado a tu historial.
                 </p>
             ) : null}
 

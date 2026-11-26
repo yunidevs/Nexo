@@ -65,7 +65,7 @@ export default function PaginaEmpresasMarketplace() {
     return (
         <main>
             <div className="border-b border-mp-border/80 bg-mp-surface/60">
-                <div className={`${contenedor} py-8 sm:py-10`}>
+                <div className={`${contenedor} py-6 sm:py-8`}>
                     <nav
                         aria-label="Ruta de navegación"
                         className="flex items-center gap-1.5"
@@ -81,23 +81,23 @@ export default function PaginaEmpresasMarketplace() {
                         </span>
                     </nav>
 
-                    <p className={`${eyebrow} mt-5`}>
+                    <p className={`${eyebrow} mt-4`}>
                         <span
                             aria-hidden="true"
                             className="h-px w-6 bg-mp-olive/40"
                         />
                         Vendedores
                     </p>
-                    <h1 className={`${tituloSeccion} mt-2`}>
+                    <h1 className={`${tituloSeccion} mt-1.5`}>
                         Empresas del marketplace
                     </h1>
-                    <p className="mt-2 max-w-[58ch] text-[13px] leading-6 text-mp-text-soft">
+                    <p className="mt-1.5 max-w-[58ch] text-[13px] leading-6 text-mp-text-soft">
                         Cada empresa publica y vende sus productos directamente.
                     </p>
                 </div>
             </div>
 
-            <div className={`${contenedor} py-10 sm:py-12`}>
+            <div className={`${contenedor} py-8 sm:py-10`}>
                 {error ? (
                     <p
                         role="alert"

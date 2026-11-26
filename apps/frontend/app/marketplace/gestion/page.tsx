@@ -1,21 +1,34 @@
 "use client";
 
 import {
+    CheckCircle2,
+    ChevronDown,
     CircleAlert,
+    History,
     LoaderCircle,
+    MapPin,
     PackageCheck,
+    RotateCcw,
     Truck,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { apiRequest } from "@/app/lib/api";
+import { EncabezadoPagina } from "@/app/components/encabezado-pagina";
 
 type EstadoPedido =
     | "PENDIENTE_PAGO"
+    | "PAGO_RECHAZADO"
     | "PAGO_CONFIRMADO"
     | "PREPARANDO"
+    | "DESPACHADO"
     | "ENVIADO"
+    | "EN_TRANSITO"
+    | "EN_REPARTO"
     | "ENTREGADO"
     | "CANCELADO"
+    | "INCIDENCIA"
+    | "ENTREGA_FALLIDA"
+    | "DEVUELTO"
     | "REEMBOLSADO"
     | "REEMBOLSO_PENDIENTE";
 
@@ -51,25 +64,117 @@ interface PedidoMarketplace {
 
 const estadosValidos: EstadoPedido[] = [
     "PENDIENTE_PAGO",
+    "PAGO_RECHAZADO",
     "PAGO_CONFIRMADO",
     "PREPARANDO",
+    "DESPACHADO",
     "ENVIADO",
+    "EN_TRANSITO",
+    "EN_REPARTO",
     "ENTREGADO",
     "CANCELADO",
+    "INCIDENCIA",
+    "ENTREGA_FALLIDA",
+    "DEVUELTO",
     "REEMBOLSADO",
     "REEMBOLSO_PENDIENTE",
 ];
 
 const etiquetasEstado: Record<EstadoPedido, string> = {
     PENDIENTE_PAGO: "Pago pendiente",
+    PAGO_RECHAZADO: "Pago rechazado",
     PAGO_CONFIRMADO: "Pago confirmado",
     PREPARANDO: "Preparando",
+    DESPACHADO: "Despachado",
     ENVIADO: "Enviado",
+    EN_TRANSITO: "En tránsito",
+    EN_REPARTO: "En reparto",
     ENTREGADO: "Entregado",
     CANCELADO: "Cancelado",
+    INCIDENCIA: "Incidencia",
+    ENTREGA_FALLIDA: "Entrega fallida",
+    DEVUELTO: "Devuelto",
     REEMBOLSADO: "Reembolsado",
     REEMBOLSO_PENDIENTE: "Reembolso pendiente",
 };
+
+// Espejo de la máquina de estados del backend. ENVIADO es un alias heredado
+// de DESPACHADO y no se ofrece como destino para pedidos nuevos.
+const transicionesPosibles: Partial<Record<EstadoPedido, EstadoPedido[]>> = {
+    PAGO_CONFIRMADO: ["PREPARANDO", "CANCELADO", "INCIDENCIA"],
+    PREPARANDO: ["DESPACHADO", "CANCELADO", "INCIDENCIA"],
+    DESPACHADO: ["EN_TRANSITO", "ENTREGADO", "INCIDENCIA"],
+    ENVIADO: ["EN_TRANSITO", "ENTREGADO", "INCIDENCIA"],
+    EN_TRANSITO: ["EN_REPARTO", "ENTREGA_FALLIDA", "INCIDENCIA"],
+    EN_REPARTO: ["ENTREGADO", "ENTREGA_FALLIDA", "INCIDENCIA"],
+    ENTREGA_FALLIDA: ["EN_REPARTO", "DEVUELTO", "INCIDENCIA"],
+    INCIDENCIA: [
+        "PREPARANDO",
+        "DESPACHADO",
+        "EN_TRANSITO",
+        "EN_REPARTO",
+        "ENTREGADO",
+        "CANCELADO",
+    ],
+};
+
+const etiquetasAccion: Record<EstadoPedido, string> = {
+    PENDIENTE_PAGO: "Pendiente de pago",
+    PAGO_RECHAZADO: "Pago rechazado",
+    PAGO_CONFIRMADO: "Pago confirmado",
+    PREPARANDO: "Preparar pedido",
+    DESPACHADO: "Despachar pedido",
+    ENVIADO: "Marcar enviado",
+    EN_TRANSITO: "En tránsito",
+    EN_REPARTO: "En reparto",
+    ENTREGADO: "Marcar entregado",
+    CANCELADO: "Cancelar pedido",
+    INCIDENCIA: "Reportar incidencia",
+    ENTREGA_FALLIDA: "Entrega fallida",
+    DEVUELTO: "Marcar devuelto",
+    REEMBOLSADO: "Reembolsado",
+    REEMBOLSO_PENDIENTE: "Reembolso pendiente",
+};
+
+const iconosAccion: Partial<Record<EstadoPedido, typeof Truck>> = {
+    PREPARANDO: PackageCheck,
+    DESPACHADO: Truck,
+    EN_TRANSITO: Truck,
+    EN_REPARTO: MapPin,
+    ENTREGADO: CheckCircle2,
+    CANCELADO: CircleAlert,
+    INCIDENCIA: CircleAlert,
+    ENTREGA_FALLIDA: CircleAlert,
+    DEVUELTO: RotateCcw,
+};
+
+interface EventoHistorial {
+    estado: EstadoPedido;
+    detalle: string;
+    observaciones: string | null;
+    fecha: string;
+    responsable?: string | null;
+}
+
+interface HistorialPedido {
+    historial: EventoHistorial[];
+}
+
+function esHistorial(valor: unknown): valor is HistorialPedido {
+    return (
+        esObjeto(valor) &&
+        Array.isArray(valor.historial) &&
+        valor.historial.every(
+            (evento) =>
+                esObjeto(evento) &&
+                typeof evento.estado === "string" &&
+                typeof evento.detalle === "string" &&
+                typeof evento.fecha === "string" &&
+                (typeof evento.observaciones === "string" ||
+                    evento.observaciones === null),
+        )
+    );
+}
 
 function esObjeto(valor: unknown): valor is Record<string, unknown> {
     return typeof valor === "object" && valor !== null;
@@ -137,6 +242,14 @@ export default function GestionMarketplacePage() {
     const [reembolsandoId, setReembolsandoId] = useState("");
     const [error, setError] = useState("");
     const [mensaje, setMensaje] = useState("");
+    const [observaciones, setObservaciones] = useState<Record<string, string>>(
+        {},
+    );
+    const [historiales, setHistoriales] = useState<
+        Record<string, EventoHistorial[]>
+    >({});
+    const [historialCargandoId, setHistorialCargandoId] = useState("");
+    const [historialAbiertoId, setHistorialAbiertoId] = useState("");
 
     const cargar = useCallback(async () => {
         setCargando(true);
@@ -169,20 +282,31 @@ export default function GestionMarketplacePage() {
         return () => window.clearTimeout(tarea);
     }, [cargar]);
 
-    async function avanzarPedido(
+    async function cambiarEstadoPedido(
         pedido: PedidoMarketplace,
-        estado: "PREPARANDO" | "ENVIADO" | "ENTREGADO",
+        estado: EstadoPedido,
     ) {
         setActualizandoId(pedido.id);
         setError("");
         setMensaje("");
         try {
+            const observacion = observaciones[pedido.id]?.trim();
             await apiRequest(
                 `/marketplace/gestion/pedidos/${pedido.id}/estado`,
                 "PATCH",
-                { estado },
+                observacion ? { estado, observaciones: observacion } : { estado },
             );
             setMensaje("El estado del pedido se actualizó.");
+            setObservaciones((previas) => {
+                const siguientes = { ...previas };
+                delete siguientes[pedido.id];
+                return siguientes;
+            });
+            setHistoriales((previos) => {
+                const siguientes = { ...previos };
+                delete siguientes[pedido.id];
+                return siguientes;
+            });
             await cargar();
         } catch (actualizacionError) {
             setError(
@@ -192,6 +316,41 @@ export default function GestionMarketplacePage() {
             );
         } finally {
             setActualizandoId("");
+        }
+    }
+
+    async function alternarHistorial(pedido: PedidoMarketplace) {
+        if (historialAbiertoId === pedido.id) {
+            setHistorialAbiertoId("");
+            return;
+        }
+        setHistorialAbiertoId(pedido.id);
+        if (historiales[pedido.id]) return;
+
+        setHistorialCargandoId(pedido.id);
+        setError("");
+        try {
+            const resultado: unknown = await apiRequest(
+                `/marketplace/gestion/pedidos/${pedido.id}/historial`,
+            );
+            if (!esHistorial(resultado)) {
+                throw new Error(
+                    "La API devolvió un historial de pedido no válido.",
+                );
+            }
+            setHistoriales((previos) => ({
+                ...previos,
+                [pedido.id]: resultado.historial,
+            }));
+        } catch (historialError) {
+            setError(
+                historialError instanceof Error
+                    ? historialError.message
+                    : "No se pudo cargar el historial del pedido.",
+            );
+            setHistorialAbiertoId("");
+        } finally {
+            setHistorialCargandoId("");
         }
     }
 
@@ -224,30 +383,24 @@ export default function GestionMarketplacePage() {
 
     return (
         <div className="mx-auto w-full max-w-7xl">
-            <header className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-300">
-                        Ventas online
-                    </p>
-                    <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                        Pedidos del marketplace
-                    </h1>
-                    <p className="mt-2 text-sm text-slate-400">
-                        Coordina el envío directamente con cada comprador.
-                    </p>
-                </div>
-                <button
-                    type="button"
-                    onClick={() => void cargar()}
-                    disabled={cargando}
-                    className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 px-4 text-sm text-slate-300 hover:bg-white/[0.05] disabled:opacity-50"
-                >
-                    {cargando && (
-                        <LoaderCircle className="size-4 animate-spin" />
-                    )}
-                    Actualizar
-                </button>
-            </header>
+            <EncabezadoPagina
+                kicker="Ventas online"
+                titulo="Pedidos del marketplace"
+                descripcion="Coordina el envío directamente con cada comprador."
+                acciones={
+                    <button
+                        type="button"
+                        onClick={() => void cargar()}
+                        disabled={cargando}
+                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 px-3.5 text-[13px] text-slate-300 hover:bg-white/[0.05] disabled:opacity-50"
+                    >
+                        {cargando && (
+                            <LoaderCircle className="size-4 animate-spin" />
+                        )}
+                        Actualizar
+                    </button>
+                }
+            />
 
             {error && (
                 <p
@@ -268,12 +421,12 @@ export default function GestionMarketplacePage() {
             )}
 
             {cargando && pedidos.length === 0 ? (
-                <p className="mt-10 inline-flex items-center gap-2 text-sm text-slate-400">
+                <p className="mt-6 inline-flex items-center gap-2 text-sm text-slate-400">
                     <LoaderCircle className="size-4 animate-spin" />
                     Cargando pedidos...
                 </p>
             ) : pedidos.length === 0 ? (
-                <div className="mt-7 rounded-2xl border border-white/[0.08] bg-white/[0.025] px-5 py-12 text-center">
+                <div className="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.025] px-5 py-10 text-center">
                     <PackageCheck className="mx-auto size-8 text-slate-500" />
                     <p className="mt-3 text-sm font-medium text-slate-300">
                         Aún no hay pedidos
@@ -283,7 +436,7 @@ export default function GestionMarketplacePage() {
                     </p>
                 </div>
             ) : (
-                <ul className="mt-7 space-y-4">
+                <ul className="mt-4 space-y-4">
                     {pedidos.map((pedido) => (
                         <li
                             key={pedido.id}
@@ -370,11 +523,36 @@ export default function GestionMarketplacePage() {
                                     despaches este pedido.
                                 </p>
                             )}
-                            {(pedido.estado === "PAGO_CONFIRMADO" ||
+                            {((transicionesPosibles[pedido.estado]?.length ??
+                                0) > 0 ||
+                                pedido.estado === "PAGO_CONFIRMADO" ||
                                 pedido.estado === "PREPARANDO" ||
-                                pedido.estado === "ENVIADO" ||
-                                pedido.estado === "REEMBOLSO_PENDIENTE") && (
-                                <div className="mt-5 flex flex-wrap justify-end gap-2">
+                                pedido.estado ===
+                                    "REEMBOLSO_PENDIENTE") && (
+                                <div className="mt-5 space-y-3">
+                                    {(transicionesPosibles[pedido.estado]
+                                        ?.length ?? 0) > 0 && (
+                                        <input
+                                            type="text"
+                                            value={
+                                                observaciones[pedido.id] ?? ""
+                                            }
+                                            onChange={(evento) =>
+                                                setObservaciones(
+                                                    (previas) => ({
+                                                        ...previas,
+                                                        [pedido.id]:
+                                                            evento.target
+                                                                .value,
+                                                    }),
+                                                )
+                                            }
+                                            placeholder="Observación para el comprador (opcional)"
+                                            maxLength={1000}
+                                            className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-indigo-400/50 focus:outline-none"
+                                        />
+                                    )}
+                                    <div className="flex flex-wrap justify-end gap-2">
                                     {(pedido.estado === "PAGO_CONFIRMADO" ||
                                         pedido.estado === "PREPARANDO" ||
                                         pedido.estado ===
@@ -398,60 +576,151 @@ export default function GestionMarketplacePage() {
                                                 : "Reembolsar y cancelar"}
                                         </button>
                                     )}
-                                    {pedido.estado === "PAGO_CONFIRMADO" ? (
-                                        <button
-                                            type="button"
-                                            disabled={
-                                                actualizandoId === pedido.id
-                                            }
-                                            onClick={() =>
-                                                void avanzarPedido(
-                                                    pedido,
-                                                    "PREPARANDO",
-                                                )
-                                            }
-                                            className="inline-flex h-10 items-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-on-accent hover:bg-indigo-400 disabled:opacity-50"
-                                        >
-                                            <PackageCheck className="size-4" />
-                                            Preparar pedido
-                                        </button>
-                                    ) : pedido.estado === "PREPARANDO" ? (
-                                        <button
-                                            type="button"
-                                            disabled={
-                                                actualizandoId === pedido.id
-                                            }
-                                            onClick={() =>
-                                                void avanzarPedido(
-                                                    pedido,
-                                                    "ENVIADO",
-                                                )
-                                            }
-                                            className="inline-flex h-10 items-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-on-accent hover:bg-indigo-400 disabled:opacity-50"
-                                        >
-                                            <Truck className="size-4" />
-                                            Marcar enviado
-                                        </button>
-                                    ) : pedido.estado === "ENVIADO" ? (
-                                        <button
-                                            type="button"
-                                            disabled={
-                                                actualizandoId === pedido.id
-                                            }
-                                            onClick={() =>
-                                                void avanzarPedido(
-                                                    pedido,
-                                                    "ENTREGADO",
-                                                )
-                                            }
-                                            className="inline-flex h-10 items-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-on-accent hover:bg-indigo-400 disabled:opacity-50"
-                                        >
-                                            <PackageCheck className="size-4" />
-                                            Marcar entregado
-                                        </button>
-                                    ) : null}
+                                    {(transicionesPosibles[pedido.estado] ??
+                                        []
+                                    ).map((destino) => {
+                                        const Icono =
+                                            iconosAccion[destino] ?? Truck;
+                                        const negativo = [
+                                            "CANCELADO",
+                                            "DEVUELTO",
+                                            "ENTREGA_FALLIDA",
+                                            "INCIDENCIA",
+                                        ].includes(destino);
+                                        return (
+                                            <button
+                                                key={destino}
+                                                type="button"
+                                                disabled={
+                                                    actualizandoId ===
+                                                    pedido.id
+                                                }
+                                                onClick={() =>
+                                                    void cambiarEstadoPedido(
+                                                        pedido,
+                                                        destino,
+                                                    )
+                                                }
+                                                className={
+                                                    negativo
+                                                        ? "inline-flex h-10 items-center gap-2 rounded-lg border border-amber-400/20 px-4 text-sm font-medium text-amber-200 hover:bg-amber-400/[0.07] disabled:opacity-50"
+                                                        : "inline-flex h-10 items-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-on-accent hover:bg-indigo-400 disabled:opacity-50"
+                                                }
+                                            >
+                                                {actualizandoId ===
+                                                pedido.id ? (
+                                                    <LoaderCircle className="size-4 animate-spin" />
+                                                ) : (
+                                                    <Icono className="size-4" />
+                                                )}
+                                                {etiquetasAccion[destino]}
+                                            </button>
+                                        );
+                                    })}
+                                    </div>
                                 </div>
                             )}
+
+                            <div className="mt-4 border-t border-white/[0.06] pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        void alternarHistorial(pedido)
+                                    }
+                                    className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200"
+                                >
+                                    <History className="size-4" />
+                                    {historialAbiertoId === pedido.id
+                                        ? "Ocultar historial"
+                                        : "Ver historial de estados"}
+                                    <ChevronDown
+                                        className={`size-4 transition-transform ${
+                                            historialAbiertoId === pedido.id
+                                                ? "rotate-180"
+                                                : ""
+                                        }`}
+                                    />
+                                </button>
+                                {historialAbiertoId === pedido.id && (
+                                    <div className="mt-4">
+                                        {historialCargandoId === pedido.id ? (
+                                            <p className="inline-flex items-center gap-2 text-sm text-slate-400">
+                                                <LoaderCircle className="size-4 animate-spin" />
+                                                Cargando historial...
+                                            </p>
+                                        ) : (
+                                            <ul className="space-y-3">
+                                                {(
+                                                    historiales[pedido.id] ?? []
+                                                ).map((evento, indice) => (
+                                                    <li
+                                                        key={indice}
+                                                        className="flex gap-3 text-sm"
+                                                    >
+                                                        <span
+                                                            className={`mt-1.5 size-2 shrink-0 rounded-full ${
+                                                                indice === 0
+                                                                    ? "bg-indigo-400"
+                                                                    : "bg-slate-600"
+                                                            }`}
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium text-slate-200">
+                                                                {etiquetasEstado[
+                                                                    evento.estado
+                                                                ] ??
+                                                                    evento.estado.replace(
+                                                                        /_/g,
+                                                                        " ",
+                                                                    )}
+                                                            </p>
+                                                            <p className="text-xs text-slate-500">
+                                                                {evento.detalle}
+                                                            </p>
+                                                            {evento.observaciones && (
+                                                                <p className="mt-1 rounded-md border border-white/[0.06] bg-white/[0.02] px-2 py-1 text-xs italic text-slate-400">
+                                                                    “
+                                                                    {
+                                                                        evento.observaciones
+                                                                    }
+                                                                    ”
+                                                                </p>
+                                                            )}
+                                                            <p className="mt-0.5 text-[11px] text-slate-600">
+                                                                {new Intl.DateTimeFormat(
+                                                                    "es-UY",
+                                                                    {
+                                                                        dateStyle:
+                                                                            "medium",
+                                                                        timeStyle:
+                                                                            "short",
+                                                                    },
+                                                                ).format(
+                                                                    new Date(
+                                                                        evento.fecha,
+                                                                    ),
+                                                                )}
+                                                                {evento.responsable
+                                                                    ? ` · ${evento.responsable}`
+                                                                    : ""}
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                                {(
+                                                    historiales[pedido.id] ?? []
+                                                ).length === 0 && (
+                                                    <li className="text-sm text-slate-500">
+                                                        Este pedido aún no
+                                                        tiene eventos
+                                                        registrados.
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </li>
                     ))}
                 </ul>
